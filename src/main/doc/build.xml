@@ -1,0 +1,241 @@
+<?xml version="1.0"?>
+
+<project name="erudite" default="dist">
+
+  <property name="top" location="../../.."/>
+  <property file="${top}/../build.local"/>
+
+  <property name="build" location="${top}/target/doc-build"/>
+
+  <property name="sed" location="/bin/sed"/>
+  <property name="pandoc" location="/usr/bin/pandoc"/>
+  <property name="ebook-convert" location="/usr/bin/ebook-convert"/>
+
+  <target
+    name="dist"
+    description="Creates all documentation targets."
+    depends="html,ebooks"
+  />
+
+  <target
+    name="ebooks"
+    description="Creates all ebook targets."
+    depends="epub,mobi"
+  />
+
+  <target
+    name="html"
+    description="Create HTML version of the documentation (all files in one folder)."
+    depends="init,ebooks"
+  >
+    <mkdir dir="${build}/doc"/>
+    <copy todir="${build}/doc">
+      <fileset dir="." includes="**/*.png"/>
+    </copy>
+    <copy file="${build}/erudite.epub" todir="${build}/doc"/>
+    <copy file="${build}/erudite.mobi" todir="${build}/doc"/>
+    <antcall target="html_func">
+      <param name="infile" location="${build}/working/erudite_html.markdown"/>
+      <param name="outfile" location="${build}/doc/index.html"/>
+      <param name="image_prefix" value=""/>
+      <param name="ebook_prefix" value=""/>
+      <param name="for_website" value="true"/>
+      <param name="for_jekyll" value="false"/>
+    </antcall>
+  </target>
+
+  <target
+    name="epub"
+    description="Create epub version of the documentation."
+    depends="init,ebook_html"
+  >
+    <if>
+      <not>
+        <uptodate targetfile="${build}/erudite.epub">
+          <srcfiles file="${build}/working/erudite_ebook.html"/>
+          <srcfiles dir="${build}/working" includes="**/*.png"/>
+        </uptodate>
+      </not>
+      <then>
+        <echo>Running ebook-convert to generate epub.</echo>
+        <exec executable="${ebook-convert}">
+          <arg value="${build}/working/erudite_ebook.html"/>
+          <arg value="${build}/erudite.epub"/>
+          <arg value="--dont-split-on-page-breaks"/>
+          <arg value="--no-default-epub-cover"/>
+          <arg value="--change-justification=left"/>
+          <arg value="--authors=Erudite"/>
+          <arg value="--title=Erudite"/>
+        </exec>
+      </then>
+    </if>
+  </target>
+
+  <target
+    name="mobi"
+    description="Create mobi version of the documentation."
+    depends="init,ebook_html"
+  >
+    <if>
+      <not>
+        <uptodate targetfile="${build}/erudite.mobi">
+          <srcfiles file="${build}/working/erudite_ebook.html"/>
+          <srcfiles dir="${build}/working" includes="**/*.png"/>
+          <srcfiles file="${basedir}/../etc/erudite_mobi_cover.png"/>
+        </uptodate>
+      </not>
+      <then>
+        <echo>Running ebook-convert to generate mobi.</echo>
+        <exec executable="${ebook-convert}">
+          <arg value="${build}/working/erudite_ebook.html"/>
+          <arg value="${build}/erudite.mobi"/>
+          <arg value="--change-justification=left"/>
+          <arg value="--no-inline-toc"/>
+          <arg value="--prefer-metadata-cover"/>
+          <arg value="--authors=Erudite"/>
+          <arg value="--title=Erudite"/>
+          <arg value="--cover=${basedir}/../etc/erudite_mobi_cover.png"/>
+        </exec>
+      </then>
+    </if>
+  </target>
+
+  <target name="install_markdown" depends="ebooks">
+    <!-- Called by off-site project to integrate jekyll output into evanmclean.com.
+          Must have the following variables defined:
+            markdown_file - Where to generate the markdown file.
+            images_dir - Where to copy images.
+            ebooks_dir - Where to copy the ebooks.
+          Optional:
+            image_prefix - For markdown output
+            ebook_prefix - For markdown output
+    -->
+    <copy todir="${images_dir}">
+      <fileset dir="." includes="**/*.png"/>
+    </copy>
+    <copy file="${build}/erudite.epub" todir="${ebooks_dir}"/>
+    <copy file="${build}/erudite.mobi" todir="${ebooks_dir}"/>
+    <antcall target="markdown_func">
+      <param name="outfile" location="${markdown_file}"/>
+      <param name="for_website" value="true"/>
+      <param name="for_jekyll" value="true"/>
+    </antcall>
+  </target>
+
+  <target name="ebook_html">
+    <antcall target="html_func">
+      <param name="infile" location="${build}/working/erudite_ebook.markdown"/>
+      <param name="outfile" location="${build}/working/erudite_ebook.html"/>
+      <param name="image_prefix" value=""/>
+      <param name="ebook_prefix" value=""/>
+      <param name="for_website" value="false"/>
+      <param name="for_jekyll" value="false"/>
+    </antcall>
+  </target>
+
+  <target
+    name="html_func"
+    depends="init"
+  >
+    <!-- Must call with parameters infile and outfile -->
+    <antcall target="markdown_func">
+      <param name="outfile" location="${infile}"/>
+    </antcall>
+    <if>
+      <not>
+        <uptodate srcfile="${infile}" targetfile="${outfile}"/>
+      </not>
+      <then>
+        <echo>Running pandoc.</echo>
+        <exec executable="${pandoc}">
+          <arg value="--from=markdown"/>
+          <arg value="--to=html"/>
+          <arg value="--toc"/>
+          <arg value="--smart"/>
+          <arg value="-s"/>
+          <arg value="--template=${basedir}/template.html"/>
+          <arg value="--output=${outfile}"/>
+          <arg value="${infile}"/>
+        </exec>
+      </then>
+    </if>
+  </target>
+
+  <target
+    name="markdown_func"
+    depends="usage,init"
+  >
+    <!-- Must call with parameter outfile -->
+    <if>
+      <not>
+        <uptodate targetfile="${outfile}">
+          <srcfiles file="${build}/working/erudite.ftl"/>
+          <srcfiles file="${build}/working/sample_config.properties"/>
+          <srcfiles file="${build}/working/usage_insert.txt"/>
+        </uptodate>
+      </not>
+      <then>
+        <!-- Set defaults if not already set. -->
+        <property name="image_prefix" value=""/>
+        <property name="ebook_prefix" value=""/>
+        <property name="for_website" value="false"/>
+        <property name="for_jekyll" value="false"/>
+        <fmpp
+          sourceFile="${build}/working/erudite.ftl"
+          outputFile="${outfile}"
+          sourceEncoding="UTF-8"
+          outputEncoding="UTF-8"
+          data="antProperties(image_prefix, ebook_prefix, for_website, for_jekyll)"
+        />
+      </then>
+    </if>
+  </target>
+
+  <target name="usage" depends="init">
+    <if>
+      <not>
+        <uptodate
+          srcfile="${top}/target/erudite.jar"
+          targetfile="${build}/working/usage_insert.txt"
+        />
+      </not>
+      <then>
+        <java jar="${top}/target/erudite.jar" fork="true" output="${build}/working/usage_raw.txt"/>
+        <exec executable="${sed}" input="${build}/working/usage_raw.txt" output="${build}/working/usage_insert.txt">
+          <arg value="-e"/> <arg value="s/&lt;/\&amp;lt;/g"/>
+          <arg value="-e"/> <arg value="s/&gt;/\&amp;gt;/g"/>
+          <arg value="-e"/> <arg value="s/&quot;/\&amp;quot;/g"/>
+          <arg value="-e"/> <arg value="s/Default is .*\.dat$/Default is \/home\/user\/.erudite\/session.dat/"/>
+          <arg value="-e"/> <arg value="s/Default is .*\.properties$/Default is \/home\/user\/.erudite\/session.properties/"/>
+          <arg value="-e"/> <arg value="s/Default is .*\.html$/Default is \/home\/user\/.erudite\/session.html/"/>
+          <arg value="-e"/> <arg value="s/^Default session file.*$/Default session file: \/home\/user\/.erudite\/session.dat/"/>
+          <arg value="-e"/> <arg value="s/^Default configuration file.*$/Default configuration file: \/home\/user\/.erudite\/session.properties/"/>
+          <arg value="-e"/> <arg value="s/^Default template file.*$/Default template file (optional): \/home\/user\/.erudite\/session.html/"/>
+        </exec>
+      </then>
+    </if>
+  </target>
+
+  <target name="init" unless="initialised">
+    <mkdir dir="${build}/working"/>
+    <copy file="erudite.markdown" tofile="${build}/working/erudite.ftl"/>
+    <copy file="../resources/com/evanmclean/erudite/sample_config.properties" todir="${build}/working"/>
+    <copy todir="${build}/working">
+      <fileset dir="." includes="**/*.png"/>
+    </copy>
+    <antcall target="makejar"/>
+    <taskdef resource="net/sf/antcontrib/antcontrib.properties" classpath="${top}/target/libs/doc/ant-contrib.jar"/>
+    <taskdef name="fmpp" classname="fmpp.tools.AntTask" classpath="${top}/target/libs/doc/fmpp.jar"/>
+    <property name="initialised" value="true"/>
+  </target>
+
+  <target name="makejar" unless="madejar">
+    <ant antfile="${top}/build.xml" dir="${top}" target="jar"/>
+    <property name="madejar" value="true"/>
+  </target>
+
+  <target name="clean" description="Remove documentation build files.">
+    <delete dir="${build}"/>
+  </target>
+
+</project>

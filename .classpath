@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src/main/java"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="target/libs/default/findbugs.jar"/>
+	<classpathentry kind="lib" path="target/libs/default/junit.jar"/>
+	<classpathentry kind="lib" path="target/libs/default/logback-classic.jar"/>
+	<classpathentry kind="lib" path="target/libs/default/logback-core.jar"/>
+	<classpathentry kind="lib" path="target/libs/default/slf4j-api.jar"/>
+	<classpathentry kind="lib" path="target/libs/default/commons-cli.jar"/>
+	<classpathentry kind="lib" path="target/libs/default/guava.jar"/>
+	<classpathentry kind="lib" path="src/main/resources"/>
+	<classpathentry kind="lib" path="src/main/libs/default/evlib.jar"/>
+	<classpathentry kind="lib" path="target/libs/default/jline.jar"/>
+	<classpathentry kind="lib" path="target/libs/default/jsoup.jar"/>
+	<classpathentry kind="lib" path="target/libs/default/mime-util.jar"/>
+	<classpathentry kind="lib" path="target/libs/default/commons-configuration.jar"/>
+	<classpathentry kind="lib" path="target/libs/default/commons-lang.jar"/>
+	<classpathentry kind="lib" path="target/libs/default/jcl-over-slf4j.jar"/>
+	<classpathentry kind="lib" path="target/libs/default/jackson-core.jar"/>
+	<classpathentry kind="output" path="target/eclipse/classes"/>
+</classpath>

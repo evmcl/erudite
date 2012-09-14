@@ -1,0 +1,153 @@
+<?xml version="1.0"?>
+
+<project name="erudite" default="dist" xmlns:ivy="antlib:org.apache.ivy.ant">
+
+  <property name="top" location="."/>
+  <property file="${top}/../build.local"/>
+
+  <property name="ivy.install.version" value="2.2.0"/>
+  <condition property="ivy.home" value="${env.IVY_HOME}">
+    <isset property="env.IVY_HOME"/>
+  </condition>
+  <property name="ivy.home" location="${user.home}/.ant"/>
+  <property name="ivy.jar.dir" location="${ivy.home}/lib"/>
+  <property name="ivy.jar.file" value="ivy-${ivy.install.version}.jar"/>
+  <property name="ivy.jar.path" location="${ivy.jar.dir}/${ivy.jar.file}"/>
+
+  <property name="evlib.home" location="${top}/../evlibjava"/>
+
+  <target
+    name="dist"
+    description="Creates the full distribution."
+    depends="jar,doc"
+  >
+    <zip destfile="target/erudite.zip">
+      <fileset dir="target" includes="erudite.jar"/>
+      <fileset dir="." includes="README.txt,LICENSE.txt,NOTICE.txt"/>
+      <fileset dir="target/doc-build" includes="doc/**/*"/>
+    </zip>
+  </target>
+
+  <target
+    name="jar"
+    description="Created the application jar file."
+    depends="compile"
+  >
+    <jar destfile="target/erudite.jar" filesonly="true">
+      <manifest>
+	<attribute name="Main-Class" value="com.evanmclean.erudite.cli.Main"/>
+      </manifest>
+      <fileset dir="target/classes"/>
+      <fileset dir="src/main/resources"/>
+      <zipfileset src="src/main/libs/default/evlib.jar" includes="com/evanmclean/evlib/**/*"/>
+      <zipfileset src="target/libs/default/commons-cli.jar" includes="org/apache/commons/**/*"/>
+      <zipfileset src="target/libs/default/commons-configuration.jar" includes="org/apache/commons/**/*"/>
+      <zipfileset src="target/libs/default/commons-lang.jar" includes="org/apache/commons/**/*"/>
+      <zipfileset src="target/libs/default/guava.jar" includes="com/google/**/*"/>
+      <zipfileset src="target/libs/default/jackson-core.jar" includes="com/fasterxml/jackson/core/**/*"/>
+      <zipfileset src="target/libs/default/jline.jar" includes="jline/**/*,org/fusesource/**/*,META-INF/native/**/*"/>
+      <zipfileset src="target/libs/default/jsoup.jar" includes="org/jsoup/**/*"/>
+      <zipfileset src="target/libs/default/logback-classic.jar" includes="ch/qos/**/*,org/slf4j/**/*"/>
+      <zipfileset src="target/libs/default/logback-core.jar" includes="ch/qos/**/*"/>
+      <zipfileset src="target/libs/default/mime-util.jar" includes="eu/medsea/**/*,mime.cache"/>
+      <zipfileset src="target/libs/default/slf4j-api.jar" includes="org/slf4j/**/*"/>
+      <zipfileset src="target/libs/default/jcl-over-slf4j.jar" includes="org/apache/commons/**/*"/>
+    </jar>
+  </target>
+
+  <target name="compile" depends="init" description="Compile java code.">
+    <mkdir dir="target/classes"/>
+    <javac
+      srcdir="src/main/java"
+      destdir="target/classes"
+      classpathref="default.class.path"
+      target="1.6"
+      source="1.6"
+      debug="on"
+      debuglevel="lines,vars,source"
+      deprecation="on"
+      includeantruntime="false"
+    />
+  </target>
+
+  <target name="javadoc" depends="compile" description="Creates the java doc.">
+    <uptodate property="skip.javadoc" targetfile="target/javadoc/index.html">
+      <srcfiles dir="target/classes" includes="**/*"/>
+    </uptodate>
+    <antcall target="dojavadoc" inheritRefs="true"/>
+  </target>
+
+  <target name="dojavadoc" unless="skip.javadoc">
+    <delete dir="target/javadoc"/>
+    <mkdir dir="target/javadoc"/>
+
+    <javadoc
+      destdir="target/javadoc"
+      sourcepath="src/main/java"
+      packagenames="com.evanmclean.*"
+      overview="src/main/etc/overview.html"
+      classpathref="default.class.path"
+    >
+      <link href="http://download.oracle.com/javase/6/docs/api/"/>
+      <link href="http://guava-libraries.googlecode.com/svn/trunk/javadoc/"/>
+      <link href="http://jsoup.org/apidocs/"/>
+    </javadoc>
+  </target>
+
+  <target name="doc" depends="jar" description="Create documentation files.">
+    <ant antfile="${top}/src/main/doc/build.xml" dir="src/main/doc">
+      <property name="madejar" value="true"/>
+    </ant>
+  </target>
+
+  <target name="clean" description="Cleans up dist and docs.">
+    <delete dir="dist"/>
+    <delete dir="target"/>
+  </target>
+
+  <target name="init" depends="install-ivy,install-evlib">
+    <!-- Note: It seems for some reason mime-util is a bundle instead of a jar type. -->
+    <ivy:retrieve pattern="target/libs/[conf]/[artifact].[ext]" type="jar,bundle"/>
+
+    <path id="default.class.path">
+      <fileset dir="target/libs">
+	<include name="default/*.jar"/>
+	<include name="built/*.jar"/>
+      </fileset>
+      <fileset dir="src/main/libs">
+	<include name="default/*.jar"/>
+      </fileset>
+    </path>
+  </target>
+
+  <target name="download-ivy" unless="skip.ivy.download">
+    <mkdir dir="${ivy.jar.dir}"/>
+    <echo message="installing ivy..."/>
+    <get
+      src="http://repo1.maven.org/maven2/org/apache/ivy/ivy/${ivy.install.version}/ivy-${ivy.install.version}.jar"
+      dest="${ivy.jar.path}"
+      usetimestamp="true"
+    />
+  </target>
+
+  <target name="install-ivy">
+    <available property="skip.ivy.download" file="${ivy.jar.path}"/>
+    <antcall target="download-ivy"/>
+    <path id="ivy.lib.path">
+      <fileset dir="${ivy.jar.dir}" includes="${ivy.jar.file}"/>
+    </path>
+    <taskdef
+      resource="org/apache/ivy/ant/antlib.xml"
+      uri="antlib:org.apache.ivy.ant"
+      classpathref="ivy.lib.path"
+    />
+  </target>
+
+  <target name="install-evlib">
+    <mkdir dir="src/main/libs/default"/>
+    <copy todir="src/main/libs/default">
+      <fileset dir="${evlib.home}/dist" includes="evlib*.jar"/>
+      <globmapper from="*.jar" to="evlib.jar"/>
+    </copy>
+  </target>
+</project>

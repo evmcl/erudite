@@ -1,0 +1,41 @@
+Erudite
+Copyright 2012 Evan McLean
+Apache License 2.0
+
+Erudite makes use of the following software libraries:
+
+Apache Commons
+http://commons.apache.org/
+Apache License http://www.apache.org/licenses/
+
+Evlib Java
+https://github.com/evmcl/evlibjava
+BSD License https://github.com/evmcl/evlibjava/blob/master/license.txt
+
+Guava Libraries
+https://code.google.com/p/guava-libraries/
+Apache License 2.0 http://www.apache.org/licenses/LICENSE-2.0
+
+Jackson JSON Processor
+http://wiki.fasterxml.com/JacksonHome
+Dual Apache 2.0 and LGPL 2.1 http://wiki.fasterxml.com/JacksonLicensing
+
+JLine2
+https://github.com/jline/jline2
+BSD License https://github.com/jline/jline2/blob/master/LICENSE.txt
+
+jsoup: Java HTML Parser
+http://jsoup.org/
+MIT License http://jsoup.org/license
+
+Logback
+http://logback.qos.ch/
+Dual EPL v1.0 and LPGL 2.1 http://logback.qos.ch/license.html
+
+MIME Type Detection Utility
+https://sourceforge.net/projects/mime-util/
+Apache License 2.0 https://sourceforge.net/directory/license:apache2/
+
+Simple Logging Facade for Java (SLF4J)
+http://www.slf4j.org/
+MIT license http://www.slf4j.org/license.html

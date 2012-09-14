@@ -1,0 +1,62 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <title>Erudite</title>
+<style type="text/css">
+  body {
+    font-family: Arial;
+    line-height: 1.5;
+    max-width: 60em;
+  }
+
+  pre {
+    line-height: normal;
+  }
+
+  h1 {
+    font-size: 160%;
+  }
+
+  h2 {
+    font-size: 125%;
+  }
+
+  h3 {
+    font-size: 110%;
+  }
+
+  h4 {
+    font-size: 105%;
+  }
+
+  a {
+    color: #104A91;
+  }
+
+  h1 a, h2 a, h3 a, h4 a, div#TOC a {
+    text-decoration: none;
+  }
+
+  h1 a:hover, h2 a:hover, h3 a:hover, h4 a:hover, div#TOC a:hover {
+    text-decoration: underline;
+  }
+
+  img {
+    border: 0;
+  }
+</style>
+</head>
+<body>
+<div id="header">
+<h1 class="title">Erudite</h1>
+</div>
+$if(toc)$
+<div id="TOC">
+$toc$
+</div>
+$endif$
+$body$
+</body>
+</html>
