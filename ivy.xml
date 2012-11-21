@@ -18,8 +18,8 @@
     <dependency org="ch.qos.logback" name="logback-core" rev="1.0.7" transitive="false" conf="default"/>
     <!-- Note: It seems for some reason mime-util is a bundle instead of a jar type. -->
     <dependency org="eu.medsea.mimeutil" name="mime-util" rev="2.1.3" transitive="false" conf="default"/>
-    <dependency org="org.slf4j" name="slf4j-api" rev="1.7.0" transitive="false" conf="default"/>
-    <dependency org="org.slf4j" name="jcl-over-slf4j" rev="1.7.0" transitive="false" conf="default"/>
+    <dependency org="org.slf4j" name="slf4j-api" rev="1.7.2" transitive="false" conf="default"/>
+    <dependency org="org.slf4j" name="jcl-over-slf4j" rev="1.7.2" transitive="false" conf="default"/>
 
     <dependency org="net.sourceforge.fmpp" name="fmpp" rev="0.9.14" transitive="true" conf="doc->default"/>
     <dependency org="ant-contrib" name="ant-contrib" rev="1.0b3" transitive="true" conf="doc->default"/>

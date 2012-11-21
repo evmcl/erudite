@@ -438,6 +438,9 @@ public final class ImageHandlerFactory
               in.close();
             }
 
+            if ( bimage == null )
+              throw new NullPointerException("Doesn't appear to be an image.");
+
             if ( (bimage.getWidth() <= minWidth)
                 || (bimage.getHeight() <= minHeight) )
             {
@@ -456,7 +459,7 @@ public final class ImageHandlerFactory
           log.trace("Retrieved image: {}", url);
           return image;
         }
-        catch ( IOException ex )
+        catch ( Exception ex )
         {
           log.trace("Exception while retriving image: " + url, ex);
           return new ImageContent(null, null, ex.getMessage());
