@@ -100,7 +100,7 @@ public class Args
     System.out.println();
     System.out.println("    <source>: Where you'll be pulling articles from.");
     System.out
-        .println("              Currently the only valid value is \"instapaper\".");
+        .println("              Either \"instapaper\" or \"readability\".");
     System.out.println();
     System.out.println("    <file>: Where to save the session data.");
     System.out.println("            Default is " + def_session_file.toString());

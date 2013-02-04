@@ -36,6 +36,10 @@ MIME Type Detection Utility
 https://sourceforge.net/projects/mime-util/
 Apache License 2.0 https://sourceforge.net/directory/license:apache2/
 
+Scribe: OAuth library
+https://github.com/fernandezpablo85/scribe-java
+MIT License https://github.com/fernandezpablo85/scribe-java/blob/master/LICENSE.txt
+
 Simple Logging Facade for Java (SLF4J)
 http://www.slf4j.org/
 MIT license http://www.slf4j.org/license.html

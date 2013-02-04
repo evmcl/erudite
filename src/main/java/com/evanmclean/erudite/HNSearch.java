@@ -110,7 +110,7 @@ public final class HNSearch
               if ( token == null )
               {
                 log.trace(
-                  "Could not find reuslts array in JSON object from {}: {}",
+                  "Could not find results array in JSON object from {}: {}",
                   hnsearch_url, body);
                 return NO_HN_URL;
               }

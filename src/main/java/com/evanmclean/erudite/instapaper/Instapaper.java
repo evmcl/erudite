@@ -195,7 +195,7 @@ public class Instapaper
     {
       ImmutableList<InstapaperArticle> articles = _articles;
       if ( articles == null )
-        articles = _saveArticles(connect(url).get());
+        _articles = articles = _saveArticles(connect(url).get());
       return articles;
     }
 
@@ -320,7 +320,6 @@ public class Instapaper
       }
 
       final ImmutableList<InstapaperArticle> list = bldr.build();
-      _articles = list;
       return list;
     }
 

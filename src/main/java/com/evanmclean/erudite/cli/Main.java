@@ -1,7 +1,9 @@
 package com.evanmclean.erudite.cli;
 
+import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -26,6 +28,7 @@ import com.evanmclean.erudite.jline.ConsoleReader;
 import com.evanmclean.erudite.logback.ConsoleLogging;
 import com.evanmclean.erudite.logback.Logback;
 import com.evanmclean.erudite.misc.Utils;
+import com.evanmclean.erudite.readability.Readability;
 import com.evanmclean.erudite.sessions.Session;
 import com.evanmclean.erudite.sessions.SessionIO;
 import com.evanmclean.erudite.sessions.SourceType;
@@ -122,7 +125,7 @@ public class Main
   }
 
   private static int init( final SourceType source, final File session_file )
-    throws IOException
+    throws Exception
   {
     final Logger log = LoggerFactory.getLogger(Main.class);
 
@@ -140,6 +143,10 @@ public class Main
     {
       case INSTAPAPER:
         session = initInstapaper();
+        break;
+
+      case READABILITY:
+        session = initReadability();
         break;
 
       default:
@@ -195,6 +202,62 @@ public class Main
       }
 
       return Instapaper.login(email, pass);
+    }
+    finally
+    {
+      console.getTerminal().setEchoEnabled(true);
+    }
+  }
+
+  private static Session initReadability() throws Exception
+  {
+    final Logger log = LoggerFactory.getLogger(Main.class);
+    final ConsoleReader console = new ConsoleReader();
+    try
+    {
+      log.info("Open the URL: {}", Readability.API_KEY_URL);
+      log.info("and create an API key. Enter the key and secret here.");
+
+      final String key = Str.trimToNull(console.readLine("Key: "));
+      if ( key == null )
+      {
+        console.getTerminal().setEchoEnabled(true);
+        log.error("No key specified.");
+        return null;
+      }
+
+      final String secret = Str.trimToNull(console.readLine("Secret: "));
+      if ( secret == null )
+      {
+        console.getTerminal().setEchoEnabled(true);
+        log.error("No secret specified.");
+        return null;
+      }
+
+      final Readability.Authoriser authoriser = Readability.getAuthoriser(key,
+        secret);
+      final String url = authoriser.getUrl();
+      try
+      {
+        Desktop.getDesktop().browse(new URI(url));
+        log.info("Opening {} in browser.", url);
+      }
+      catch ( IOException ex )
+      {
+        log.info("Open the URL: {}", url);
+      }
+      log.info("Click \"Allow\" and enter the verifier key here.");
+
+      final String verifier_key = Str.trimToNull(console
+          .readLine("Verifier Key: "));
+      if ( verifier_key == null )
+      {
+        console.getTerminal().setEchoEnabled(true);
+        log.error("No verifier key specified.");
+        return null;
+      }
+
+      return authoriser.getSession(verifier_key);
     }
     finally
     {

@@ -18,5 +18,9 @@
 	<classpathentry kind="lib" path="target/libs/default/commons-lang.jar"/>
 	<classpathentry kind="lib" path="target/libs/default/jcl-over-slf4j.jar"/>
 	<classpathentry kind="lib" path="target/libs/default/jackson-core.jar"/>
+	<classpathentry kind="lib" path="target/libs/default/scribe.jar"/>
+	<classpathentry kind="lib" path="target/libs/default/commons-codec.jar"/>
+	<classpathentry kind="lib" path="target/libs/default/jackson-annotations.jar"/>
+	<classpathentry kind="lib" path="target/libs/default/jackson-databind.jar"/>
 	<classpathentry kind="output" path="target/eclipse/classes"/>
 </classpath>

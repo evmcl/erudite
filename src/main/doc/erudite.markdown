@@ -8,7 +8,8 @@ title: Erudite
 # Introduction
 
 Erudite will download articles from
-[Instapaper](http://www.instapaper.com/), convert them to an appropriate
+[Instapaper](http://www.instapaper.com/) or
+[Readability](http://www.readability.com/), convert them to an appropriate
 format such as EPUB or MOBI, and add them to your
 [Calibre](http://calibre-ebook.com/) ebook library. It is a command-line
 driven tool.
@@ -22,7 +23,7 @@ This documentation is also available in
 <#if for_jekyll != "true">
 [Home Page](http://evanmclean.com/software/erudite/) &bull;
 </#if>
-[Downloads](https://github.com/evmcl/erudite/downloads) &bull;
+[Downloads](https://code.google.com/p/evmcl/downloads/list) &bull;
 [GitHub](https://github.com/evmcl/erudite)
 
 Erudite is distributed under the [Apache License
@@ -34,18 +35,20 @@ Erudite is distributed under the [Apache License
 
 # How It Works
 
-Erudite takes articles from a source (only
-[Instapaper](http://www.instapaper.com/) currently), and uses a HTML
-template file and a set of configuration properties to produce the
-appropriately formatted ebook files and (optionally) add them to your
+Erudite takes articles from a source (currently
+[Instapaper](http://www.instapaper.com/) or
+[Readability](http://www.readability.com/)), and uses a HTML template file
+and a set of configuration properties to produce the appropriately
+formatted ebook files and (optionally) add them to your
 [Calibre](http://calibre-ebook.com/) ebook library.
 
 ![Erudite Components](${image_prefix}erudite_parts.png)<#if for_jekyll != "true">\ </#if>
 
 ## Session File
 
-The session file holds the details necessary for your accessing
-[Instapaper](http://www.instapaper.com/) session.
+The session file holds the details necessary for accessing your
+[Instapaper](http://www.instapaper.com/) or
+[Readability](http://www.readability.com/) session.
 
 ## Configuration
 
@@ -89,15 +92,24 @@ will break it down for each function later:
 ## Initialise a Session
 
 Before being able to process articles, you will need to initialise your
-session with [Instapaper](http://www.instapaper.com/).
+session with either [Instapaper](http://www.instapaper.com/) or
+[Readability](http://www.readability.com/).
 
 You can generate this by running:
 
         java -jar erudite.jar init instapaper
 
-You will be prompted for your email and password. Neither of these are
-stored in the session file, only the session cookies (just like a
-browser).
+or
+
+        java -jar erudite.jar init readability
+
+For an [Instapaper](http://www.instapaper.com/) session, you will be
+prompted for your email and password. Neither of these are stored in the
+session file, only the session cookies (just like a browser).
+
+For [Readability](http://www.readability.com/), you will be directed to
+the web site to generate an API key and grant permission to Erudite to
+access your account.
 
 ## Create your Configuration
 
@@ -115,8 +127,7 @@ edit to suit your needs.
 
 ## Process Articles
 
-To download articles from [Instapaper](http://www.instapaper.com/) and
-convert them, run:
+To download articles and convert them, run:
 
         java -jar erudite.jar process
 
@@ -130,8 +141,7 @@ From the command line, you can also:
 
 ### List Articles To Be Processed
 
-To list the articles waiting at [Instapaper](http://www.instapaper.com/)
-to be processed, run:
+To list the articles waiting at the web service to be processed, run:
 
         java -jar erudite.jar list
 
@@ -197,16 +207,6 @@ Below is a fully annotated sample configuration file.
 <#if for_website == "true">
 <p><small><a href="#top">top</a></small></p>
 </#if>
-
-# For Developers
-
-Adding the ability to read articles from
-[Readability](http://www.readability.com/) is an obvious feature
-candidate. The program has been designed to make it easy to add
-additional sources, other than [Instapaper](http://www.instapaper.com/),
-so if you are interested in tackling this (or even know a good Java
-library for the [API](http://www.readability.com/developers/api)) then
-please [contact me](http://evanmclean.com/contact/).
 
 <#if for_website == "true">
 <p><small><a href="#top">top</a></small></p>

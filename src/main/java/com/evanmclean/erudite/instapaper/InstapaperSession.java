@@ -20,7 +20,7 @@ class InstapaperSession implements Session
 
   private final ImmutableMap<String, String> cookies;
 
-  public InstapaperSession( final ImmutableMap<String, String> cookies )
+  InstapaperSession( final ImmutableMap<String, String> cookies )
   {
     this.cookies = cookies;
   }

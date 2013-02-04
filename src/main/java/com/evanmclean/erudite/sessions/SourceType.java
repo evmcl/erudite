@@ -14,7 +14,12 @@ public enum SourceType
   /**
    * <a href="http://www.instapaper.com/">Instapaper</a>
    */
-  INSTAPAPER;
+  INSTAPAPER //
+  /**
+   * <a href="https://www.readability.com/">Readability</a>
+   */
+  , READABILITY //
+  ;
 
   /**
    * Get source where <code>str</code> matches that start of the source name
