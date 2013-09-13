@@ -12,6 +12,7 @@ import com.evanmclean.erudite.Source;
 import com.evanmclean.evlib.escape.Esc;
 import com.evanmclean.evlib.io.Files;
 import com.evanmclean.evlib.lang.Str;
+import com.google.common.collect.ImmutableList;
 
 /**
  * Anything that don&rsquo;t fit elsewhere.
@@ -102,13 +103,12 @@ public final class Utils
    *        The source of the article.
    * @param article
    *        The article to summarise.
-   * @param hacker_news_url
-   *        The hacker news discussion URL for the article if available (
-   *        <code>null</code> or empty string for none.)
+   * @param hacker_news_urls
+   *        The hacker news discussion URLs for the article if available.
    * @return The HTML summary.
    */
   public static String summary( final Source source, final Article article,
-      final String hacker_news_url )
+      final ImmutableList<String> hacker_news_urls )
   {
     final int MAXLEN = 1000;
 
@@ -196,14 +196,37 @@ public final class Utils
 
     buff.append("<p><a href=\"").append(Esc.htmlFull.attr(original_url))
         .append("\">").append(Esc.htmlFull.text(original_url)).append("</a>");
+
     if ( Str.isNotEmpty(source_url) )
       buff.append("<span style=\"font-size: 80%\"><br><a href=\"")
           .append(Esc.htmlFull.attr(source_url)).append("\">Read at ")
           .append(Esc.htmlFull.text(source.getName())).append(".</a></span>");
-    if ( Str.isNotEmpty(hacker_news_url) )
-      buff.append("<span style=\"font-size: 80%\"><br>(<a href=\"")
-          .append(Esc.htmlFull.attr(hacker_news_url))
-          .append("\">Hacker News discussion.</a>)</span>");
+
+    if ( (hacker_news_urls != null) && (!hacker_news_urls.isEmpty()) )
+    {
+      buff.append("<span style=\"font-size: 80%\"><br>(");
+      if ( hacker_news_urls.size() == 1 )
+      {
+        buff.append("<a href=\"")
+            .append(Esc.htmlFull.attr(hacker_news_urls.get(0)))
+            .append("\">Hacker News discussion.</a>");
+      }
+      else
+      {
+        buff.append("Hacker News discussions: ");
+        int link_num = 0;
+        for ( final String hn_url : hacker_news_urls )
+        {
+          if ( link_num > 0 )
+            buff.append(", ");
+          buff.append(" <a href=\"").append(Esc.htmlFull.attr(hn_url))
+              .append("\">#").append(++link_num).append("</a>");
+        }
+        buff.append('.');
+      }
+      buff.append(")</span>");
+    }
+
     buff.append("</p>");
     if ( Str.isNotEmpty(summary) )
       buff.append(summary);

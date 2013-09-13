@@ -137,7 +137,7 @@ public class EbookConvertProcessor implements Processor
         + (doWrapHack ? "_hacked." : ".") + filetype);
     converter.convert(article.getTitle(), html_file, pub_file, //
       Utils.summary(source, article, doHNSearch ? HNSearch.lookup(article)
-          : null) //
+          : HNSearch.EMPTY) //
         );
 
     if ( !doWrapHack )

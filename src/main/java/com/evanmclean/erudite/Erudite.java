@@ -120,15 +120,14 @@ public class Erudite
    *        Used for downloading any images we find.
    * @param do_footnotes
    *        Should we produce footnotes for links?
-   * @param hacker_news_url
-   *        The hacker news discussion URL for the article if available (
-   *        <code>null</code> or empty string for none.)
+   * @param hacker_news_urls
+   *        The hacker news discussion URLs for the article.
    * @return The full HTML document representing the article.
    * @throws IOException
    */
   public Document process( final Article article, final Source source,
       final Template template, final ImageHandler image_handler,
-      final boolean do_footnotes, final String hacker_news_url )
+      final boolean do_footnotes, final ImmutableList<String> hacker_news_urls )
     throws IOException
   {
     log.debug("Processing {}", article.getTitle());
@@ -139,27 +138,8 @@ public class Erudite
     setAByClass(doc, "erudite_original_link", article.getOriginalUrl(), null);
     insertPlug(doc, source);
 
-    final String source_url = article.getSourceUrl();
-    if ( Str.isEmpty(source_url) )
-    {
-      removeByClass(doc, "erudite_source_info");
-    }
-    else
-    {
-      setAByClass(doc, "erudite_source_url", source_url);
-      setAByClass(doc, "erudite_source_link", source_url, null);
-      setTextElementByClass(doc, "erudite_source_name", source.getName());
-    }
-
-    if ( Str.isEmpty(hacker_news_url) )
-    {
-      removeByClass(doc, "erudite_hn_info");
-    }
-    else
-    {
-      setAByClass(doc, "erudite_hn_url", hacker_news_url);
-      setAByClass(doc, "erudite_hn_link", hacker_news_url, null);
-    }
+    insertSourceMeta(doc, article, source);
+    insertHackerNewsMeta(doc, hacker_news_urls);
 
     final Element content = article.text();
     if ( do_footnotes )
@@ -348,6 +328,61 @@ public class Erudite
       log.debug("Inserted {} footnotes.", footnotes_list.size());
   }
 
+  private void insertHackerNewsMeta( final Document doc,
+      final ImmutableList<String> hacker_news_urls )
+  {
+    // #### No hacker news links.
+    if ( (hacker_news_urls == null) || hacker_news_urls.isEmpty() )
+    {
+      removeByClass(doc, "erudite_hn_info");
+      removeByClass(doc, "erudite_hn_infos");
+      return;
+    }
+
+    // #### One hacker news link.
+    if ( hacker_news_urls.size() == 1 )
+    {
+      removeByClass(doc, "erudite_hn_infos");
+      final String url = hacker_news_urls.get(0);
+      setAByClass(doc, "erudite_hn_url", url);
+      setAByClass(doc, "erudite_hn_link", url, null);
+      return;
+    }
+
+    // #### Several hacker news links.
+    removeByClass(doc, "erudite_hn_info");
+
+    final Elements links = doc.getElementsByClass("erudite_hn_links");
+    for ( final Element el : links )
+      el.empty();
+
+    final Elements urls = doc.getElementsByClass("erudite_hn_urls");
+    for ( final Element el : urls )
+      el.empty();
+
+    int link_num = 0;
+    boolean first = true;
+    for ( final String hn_url : hacker_news_urls )
+    {
+      for ( final Element el : links )
+      {
+        if ( !first )
+          el.appendText(", ");
+        el.appendElement("a").attr("class", "erudite_url_link erudite_hn_link")
+            .attr("href", hn_url).text("#" + String.valueOf(++link_num));
+      }
+
+      for ( final Element el : urls )
+      {
+        if ( !first )
+          el.appendText(", ");
+        el.appendElement("a").attr("class", "erudite_url_url erudite_hn_url")
+            .attr("href", hn_url).text(hn_url);
+      }
+      first = false;
+    }
+  }
+
   private int insertPlug( final Document doc, final Source source )
   {
     final Elements plugs = doc.getElementsByClass("erudite_source");
@@ -362,6 +397,22 @@ public class Erudite
       plug.html(source.getViaHtml());
     }
     return plugs.size();
+  }
+
+  private void insertSourceMeta( final Document doc, final Article article,
+      final Source source )
+  {
+    final String source_url = article.getSourceUrl();
+    if ( Str.isEmpty(source_url) )
+    {
+      removeByClass(doc, "erudite_source_info");
+    }
+    else
+    {
+      setAByClass(doc, "erudite_source_url", source_url);
+      setAByClass(doc, "erudite_source_link", source_url, null);
+      setTextElementByClass(doc, "erudite_source_name", source.getName());
+    }
   }
 
   private boolean isSameUrl( final String href, final String text )
