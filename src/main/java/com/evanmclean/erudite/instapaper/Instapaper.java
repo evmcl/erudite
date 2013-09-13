@@ -11,6 +11,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
 import org.jsoup.parser.Tag;
+import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -220,103 +221,99 @@ public class Instapaper
       final ImmutableList.Builder<InstapaperArticle> bldr = ImmutableList
           .builder();
 
-      final Element articles = doc.getElementById("bookmark_list");
-      if ( articles != null )
+      for ( Element article : doc.getElementsByClass("article_item") )
       {
-        for ( Element article : articles.children() )
-          if ( "div".equalsIgnoreCase(article.tagName()) )
+        final String title;
+        final String text_url;
+        {
+          final Element container = article.getElementsByClass("title_row")
+              .first();
+          if ( container == null )
+            continue;
           {
-            final String title;
-            final String source_url;
-            final String summary;
-            {
-              final Element container = article.getElementsByClass("titleRow")
-                  .first();
-              if ( container == null )
-                continue;
-              {
-                final Element link = container.getElementsByTag("a").first();
-                if ( link == null )
-                  continue;
-                title = titleMunger.munge(link.text());
-                source_url = link.attr("href");
-                if ( Str.isEmpty(title) || Str.isEmpty(source_url) )
-                  continue;
-              }
-              {
-                final Element smry = container.getElementsByClass("summary")
-                    .first();
-                summary = (smry == null) ? Str.EMPTY : Str.trimToEmpty(smry
-                    .text());
-              }
-            }
-
-            final String text_url;
-            final String archive_url;
-            {
-              final Element container = article.getElementsByClass(
-                "cornerControls").first();
-              if ( container == null )
-                throw new HasInstapaperLayoutChangedException(
-                    "Cannot find div.cornerControls for article: " + title);
-
-              String tu = null;
-              String au = null;
-
-              for ( Element link : container.getElementsByTag("a") )
-              {
-                final String text = link.text();
-                if ( "text".equalsIgnoreCase(text) )
-                  tu = link.attr("href");
-                else if ( "archive".equalsIgnoreCase(text) )
-                  au = link.attr("href");
-              }
-
-              if ( Str.isEmpty(tu) )
-                throw new HasInstapaperLayoutChangedException(
-                    "Cannot find text url for article: " + title);
-
-              if ( Str.isEmpty(au) )
-                throw new HasInstapaperLayoutChangedException(
-                    "Cannot find archive url for article: " + title);
-
-              text_url = BASE_URL + tu;
-              archive_url = BASE_URL + au;
-            }
-
-            final String delete_url;
-            final String move_url;
-            {
-              final Element container = article.getElementsByClass(
-                "secondaryControls").first();
-              if ( container == null )
-                throw new HasInstapaperLayoutChangedException(
-                    "Cannot find div.secondaryControls for article: " + title);
-
-              String du = null;
-
-              for ( Element link : container.getElementsByTag("a") )
-              {
-                final String text = link.text();
-                if ( "delete".equalsIgnoreCase(text) )
-                  du = link.attr("href");
-              }
-
-              if ( Str.isEmpty(du) || (du == null) )
-                throw new HasInstapaperLayoutChangedException(
-                    "Cannot find delete url for article: " + title);
-
-              delete_url = BASE_URL + du;
-
-              // This is a bit of a kludge: We just generate the fragment of the
-              // URL for moving to a folder.
-              move_url = BASE_URL + du.replace("delete", "move") + "/to/";
-            }
-
-            log.trace("Article: {}", title);
-            bldr.add(new Article(title, source_url, summary, text_url,
-                archive_url, move_url, delete_url));
+            final Element link = container.getElementsByTag("a").first();
+            if ( link == null )
+              continue;
+            title = titleMunger.munge(link.text());
+            final String href = link.attr("href");
+            if ( Str.isEmpty(title) || Str.isEmpty(href) )
+              continue;
+            text_url = BASE_URL + href;
           }
+        }
+        final String source_url;
+        {
+          final Element container = article.getElementsByClass("host").first();
+          if ( container == null )
+            continue;
+          {
+            final Element link = container.getElementsByTag("a").first();
+            source_url = link.attr("href");
+            if ( Str.isEmpty(source_url) )
+              continue;
+          }
+        }
+        final String summary;
+        {
+          final Element smry = article.getElementsByClass("article_preview")
+              .first();
+          summary = (smry == null) ? Str.EMPTY : Str.trimToEmpty(smry.text());
+        }
+
+        final String archive_url;
+        {
+          final Element container = article.getElementsByClass(
+            "primary_actions").first();
+          if ( container == null )
+            throw new HasInstapaperLayoutChangedException(
+                "Cannot find div.primary_actions for article: " + title);
+
+          String au = null;
+
+          for ( Element link : container.getElementsByTag("a") )
+          {
+            if ( link.hasClass("archive_button") )
+              au = link.attr("href");
+          }
+
+          if ( Str.isEmpty(au) )
+            throw new HasInstapaperLayoutChangedException(
+                "Cannot find archive url for article: " + title);
+
+          archive_url = BASE_URL + au;
+        }
+
+        final String delete_url;
+        final String move_url;
+        {
+          final Element container = article.getElementsByClass(
+            "secondary_actions").first();
+          if ( container == null )
+            throw new HasInstapaperLayoutChangedException(
+                "Cannot find div.secondary_actions for article: " + title);
+
+          String du = null;
+
+          for ( Element link : container.getElementsByTag("a") )
+          {
+            if ( link.hasClass("delete_link") )
+              du = link.attr("href");
+          }
+
+          if ( Str.isEmpty(du) || (du == null) )
+            throw new HasInstapaperLayoutChangedException(
+                "Cannot find delete url for article: " + title);
+
+          delete_url = BASE_URL + du;
+
+          // This is a bit of a kludge: We just generate the fragment of the
+          // URL for moving to a folder.
+          move_url = BASE_URL + du.replace("delete", "move") + "/to/";
+        }
+
+        log.trace("Article: {}", title);
+        bldr.add(new Article(title, source_url, summary, text_url, archive_url,
+            move_url, delete_url));
       }
 
       final ImmutableList<InstapaperArticle> list = bldr.build();
@@ -437,44 +434,53 @@ public class Instapaper
         final Folder folder = new Folder(DEFAULT_FOLDER, DEFAULT_URL,
             DEFAULT_ID);
         folder._saveArticles(doc);
-        log.trace("Folder: {}", DEFAULT_FOLDER);
+        log.trace("Folder: {} => {}", DEFAULT_FOLDER, DEFAULT_URL);
         map.put(folder.getName(), folder);
       }
 
-      final Element container = doc.getElementById("folders");
-      if ( container != null )
-      {
-        final Pattern idpat = Pattern.compile("\\/u\\/folder\\/(\\d+)\\/");
-        for ( Element el : container.children() )
-          if ( "div".equalsIgnoreCase(el.tagName()) )
-          {
-            final Element link = el.getElementsByTag("a").first();
-            if ( link != null )
-            {
-              final String name = Str.trimToNull(link.text());
-              final String url = link.attr("href");
-              final String id;
-              {
-                final Matcher mat = idpat.matcher(url);
-                if ( mat.find() )
-                  id = mat.group(1);
-                else
-                  id = null;
-              }
+      final Elements folder_columns = doc.getElementsByClass("folder_column");
+      if ( (folder_columns == null) || folder_columns.isEmpty() )
+        throw new HasInstapaperLayoutChangedException(
+            "Could not find folder column.");
 
-              if ( Str.isNotEmpty(name) && Str.isNotEmpty(url)
-                  && Str.isNotEmpty(id) )
-              {
-                log.trace("Folder: {}", name);
-                map.put(name, new Folder(name, BASE_URL + url, id));
-              }
-            }
-          }
-      }
+      _getFolders(folder_columns, map);
 
       _folders = folders = ImmutableSortedMap.copyOfSorted(map);
     }
     return folders;
+  }
+
+  private void _getFolders( final Elements els,
+      final TreeMapIgnoreCase<Folder> map )
+  {
+    if ( els == null )
+      return;
+    for ( final Element el : els )
+      if ( !"a".equalsIgnoreCase(el.tagName()) )
+      {
+        _getFolders(el.children(), map);
+      }
+      else
+      {
+        final String name = Str.trimToNull(el.text());
+        final String url = el.attr("href");
+        final String id;
+        {
+          final Matcher mat = Pattern.compile("\\/u\\/folder\\/(\\d+)\\/")
+              .matcher(url);
+          if ( mat.find() )
+            id = mat.group(1);
+          else
+            id = null;
+        }
+
+        if ( Str.isNotEmpty(name) && Str.isNotEmpty(url) && Str.isNotEmpty(id) )
+        {
+          LoggerFactory.getLogger(getClass()).trace("Folder: {} => {}", name,
+            url);
+          map.put(name, new Folder(name, url, id));
+        }
+      }
   }
 
   private Connection connect( final String url )
