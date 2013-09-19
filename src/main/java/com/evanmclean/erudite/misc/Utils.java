@@ -110,6 +110,10 @@ public final class Utils
   public static String summary( final Source source, final Article article,
       final ImmutableList<String> hacker_news_urls )
   {
+    // IMPORTANT NOTE: Usage single quotes instead of double-quotes in the HTML
+    // code you generate. When using the summary as a command line argument
+    // under windows, the double-quotes tends to break things.
+
     final int MAXLEN = 1000;
 
     String summary = abbreviate(article.getSummary(), MAXLEN);
@@ -190,26 +194,30 @@ public final class Utils
       }
     }
 
+    // IMPORTANT NOTE: Usage single quotes instead of double-quotes in the HTML
+    // code you generate. When using the summary as a command line argument
+    // under windows, the double-quotes tends to break things.
+
     final String original_url = article.getOriginalUrl();
     final String source_url = article.getSourceUrl();
     final StringBuilder buff = new StringBuilder();
 
-    buff.append("<p><a href=\"").append(Esc.htmlFull.attr(original_url))
-        .append("\">").append(Esc.htmlFull.text(original_url)).append("</a>");
+    buff.append("<p><a href='").append(Esc.htmlFull.attr(original_url))
+        .append("'>").append(Esc.htmlFull.text(original_url)).append("</a>");
 
     if ( Str.isNotEmpty(source_url) )
-      buff.append("<span style=\"font-size: 80%\"><br><a href=\"")
-          .append(Esc.htmlFull.attr(source_url)).append("\">Read at ")
+      buff.append("<span style='font-size: 80%'><br><a href='")
+          .append(Esc.htmlFull.attr(source_url)).append("'>Read at ")
           .append(Esc.htmlFull.text(source.getName())).append(".</a></span>");
 
     if ( (hacker_news_urls != null) && (!hacker_news_urls.isEmpty()) )
     {
-      buff.append("<span style=\"font-size: 80%\"><br>(");
+      buff.append("<span style='font-size: 80%'><br>(");
       if ( hacker_news_urls.size() == 1 )
       {
-        buff.append("<a href=\"")
+        buff.append("<a href='")
             .append(Esc.htmlFull.attr(hacker_news_urls.get(0)))
-            .append("\">Hacker News discussion.</a>");
+            .append("'>Hacker News discussion.</a>");
       }
       else
       {
@@ -219,8 +227,8 @@ public final class Utils
         {
           if ( link_num > 0 )
             buff.append(", ");
-          buff.append(" <a href=\"").append(Esc.htmlFull.attr(hn_url))
-              .append("\">#").append(++link_num).append("</a>");
+          buff.append(" <a href='").append(Esc.htmlFull.attr(hn_url))
+              .append("'>#").append(++link_num).append("</a>");
         }
         buff.append('.');
       }
