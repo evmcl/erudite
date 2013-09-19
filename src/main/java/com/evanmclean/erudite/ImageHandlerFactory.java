@@ -26,7 +26,10 @@ import com.evanmclean.erudite.misc.UniqueFile;
 import com.evanmclean.evlib.io.Folders;
 import com.evanmclean.evlib.lang.Arr;
 import com.evanmclean.evlib.lang.Str;
+import com.evanmclean.evlib.stringtransform.AndTransform;
 import com.evanmclean.evlib.stringtransform.FilenameTransformer;
+import com.evanmclean.evlib.stringtransform.Transform;
+import com.evanmclean.evlib.stringtransform.TransformAsciify;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -400,6 +403,7 @@ public final class ImageHandlerFactory
           {
             // Retrieve image content from URL.
             final Connection conn = Conn.connect(url);
+            conn.ignoreContentType(true);
             final Response resp = conn.execute();
             if ( resp.statusCode() != 200 )
               throw new IOException("GET " + url + " returned "
@@ -481,6 +485,82 @@ public final class ImageHandlerFactory
         return new ImageContent(out.toByteArray(), name, ".png");
       }
 
+      /**
+       * Make sure name is all lower-case, starts with a letter, and only
+       * contains ASCII letters and numbers.
+       * 
+       * @param orig
+       * @return
+       */
+      private String cookName( final String orig )
+      {
+        final Transform lower = new Transform() {
+          @Override
+          public String transform( final char ch )
+          {
+            final char newch = Character.toLowerCase(ch);
+            if ( newch == ch )
+              return null;
+            return String.valueOf(newch);
+          }
+        };
+
+        final Transform stripstd = new Transform() {
+          @Override
+          public String transform( final char ch )
+          {
+            if ( (ch < 'a') || (ch > 'z') )
+              if ( (ch < 'A') || (ch > 'Z') )
+                if ( (ch < '0') || (ch > '9') )
+                  return Str.EMPTY; // Remove
+            return null;
+          }
+        };
+
+        final Transform stripinitial = new Transform() {
+          @Override
+          public String transform( final char ch )
+          {
+            if ( (ch < 'a') || (ch > 'z') )
+              if ( (ch < 'A') || (ch > 'Z') )
+                return Str.EMPTY; // Remove
+            return null;
+          }
+        };
+
+        final Transform initial = new AndTransform(TransformAsciify.INSTANCE,
+            stripinitial, lower);
+        final Transform std = new AndTransform(TransformAsciify.INSTANCE,
+            stripstd, lower);
+
+        final int len = orig.length();
+        final StringBuilder buff = new StringBuilder(len);
+        int idx = 0;
+        while ( idx < len )
+        {
+          final char ch = orig.charAt(idx);
+          final String str = initial.transform(ch);
+          if ( str == null )
+            buff.append(ch);
+          else
+            buff.append(str);
+          ++idx;
+          if ( buff.length() > 0 )
+            break;
+        }
+        while ( idx < len )
+        {
+          final char ch = orig.charAt(idx);
+          final String str = std.transform(ch);
+          if ( str == null )
+            buff.append(ch);
+          else
+            buff.append(str);
+          ++idx;
+        }
+        return Str.ifEmpty(buff.toString(), null);
+      }
+
       private String getExt( final byte[] content )
       {
         final MimeUtil2 mu = new MimeUtil2();
@@ -496,7 +576,11 @@ public final class ImageHandlerFactory
         if ( !"image".equals(mt.getMediaType()) )
           return null;
 
-        return "." + mt.getSubType();
+        final String ext = cookName(mt.getSubType());
+        if ( Str.isEmpty(ext) )
+          return null;
+
+        return "." + ext;
       }
 
       private String getExt( final Response resp )
@@ -510,14 +594,18 @@ public final class ImageHandlerFactory
         if ( (end <= 7) || (!mimetype.startsWith("image/")) )
           return null;
 
-        return "." + mimetype.substring(6, end);
+        final String ext = cookName(mimetype.substring(6, end));
+        if ( Str.isEmpty(ext) )
+          return null;
+
+        return "." + ext;
       }
 
       private String getExt( final String source )
       {
         final int end = getUrlEnd(source);
-        final String ext = FileName.extension(source.substring(0, end));
-        final int extlen = ext.length();
+        final String ext = cookName(FileName.extension(source.substring(0, end)));
+        final int extlen = Str.length(ext);
         if ( (extlen > 0) && (extlen <= 3) )
           return "." + ext;
         return null;
@@ -526,9 +614,8 @@ public final class ImageHandlerFactory
       private String getName( final String source )
       {
         final int end = getUrlEnd(source);
-        return Str.ifEmpty(
-          FileName.sansExtension(FileName.baseName(source.substring(0, end))),
-          "image");
+        return Str.ifEmpty(cookName(FileName.sansExtension(FileName
+            .baseName(source.substring(0, end)))), "image");
       }
 
       private int getUrlEnd( final String url )
