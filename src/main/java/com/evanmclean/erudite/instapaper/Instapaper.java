@@ -108,7 +108,7 @@ public class Instapaper
     {
       LoggerFactory.getLogger(getClass()).trace(
         "Removing article on Instapaper: {}", title);
-      connect(deleteUrl).execute();
+      connect(deleteUrl).method(Connection.Method.POST).execute();
     }
 
     @SuppressWarnings( "synthetic-access" )
