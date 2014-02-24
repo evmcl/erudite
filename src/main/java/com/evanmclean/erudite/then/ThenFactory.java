@@ -36,6 +36,6 @@ public final class ThenFactory
 
   private ThenFactory()
   {
-    // emmark Auto-generated constructor stub
+    // empty
   }
 }

@@ -12,9 +12,13 @@ import com.evanmclean.erudite.Source;
 public enum SourceType
 {
   /**
-   * <a href="http://www.instapaper.com/">Instapaper</a>
+   * <a href="https://www.instapaper.com/">Instapaper</a>
    */
   INSTAPAPER //
+  /**
+   * <a href="https://getpocket.com/">Pocket</a>
+   */
+  , POCKET //
   /**
    * <a href="https://www.readability.com/">Readability</a>
    */

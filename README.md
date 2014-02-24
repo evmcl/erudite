@@ -1,9 +1,10 @@
 # Erudite
 
 Erudite will download articles from
-[Instapaper](http://www.instapaper.com/) or
-[Readability](http://www.readability.com/), convert them to an appropriate
-format such as EPUB or MOBI, and add them to your
+[Instapaper](https://www.instapaper.com/),
+[Readability](https://www.readability.com/), or
+[Pocket](https://getpocket.com/), convert them to an appropriate format
+such as EPUB or MOBI, and add them to your
 [Calibre](http://calibre-ebook.com/) ebook library. It is a command-line
 driven tool.
 

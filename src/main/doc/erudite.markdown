@@ -8,9 +8,10 @@ title: Erudite
 # Introduction
 
 Erudite will download articles from
-[Instapaper](http://www.instapaper.com/) or
-[Readability](http://www.readability.com/), convert them to an appropriate
-format such as EPUB or MOBI, and add them to your
+[Instapaper](https://www.instapaper.com/),
+[Readability](https://www.readability.com/), or
+[Pocket](https://getpocket.com/), convert them to an appropriate format
+such as EPUB or MOBI, and add them to your
 [Calibre](http://calibre-ebook.com/) ebook library. It is a command-line
 driven tool.
 
@@ -35,11 +36,12 @@ Erudite is distributed under the [Apache License
 
 # How It Works
 
-Erudite takes articles from a source (currently
-[Instapaper](http://www.instapaper.com/) or
-[Readability](http://www.readability.com/)), and uses a HTML template file
-and a set of configuration properties to produce the appropriately
-formatted ebook files and (optionally) add them to your
+Erudite takes articles from a source (such as
+[Instapaper](https://www.instapaper.com/),
+[Readability](https://www.readability.com/), or
+[Pocket](https://getpocket.com/)) and uses a HTML template file and a set
+of configuration properties to produce the appropriately formatted ebook
+files and (optionally) add them to your
 [Calibre](http://calibre-ebook.com/) ebook library.
 
 ![Erudite Components](${image_prefix}erudite_parts.png)<#if for_jekyll != "true">\ </#if>
@@ -47,8 +49,9 @@ formatted ebook files and (optionally) add them to your
 ## Session File
 
 The session file holds the details necessary for accessing your
-[Instapaper](http://www.instapaper.com/) or
-[Readability](http://www.readability.com/) session.
+[Instapaper](https://www.instapaper.com/),
+[Readability](https://www.readability.com/), or
+[Pocket](https://getpocket.com/) session.
 
 ## Configuration
 
@@ -92,8 +95,9 @@ will break it down for each function later:
 ## Initialise a Session
 
 Before being able to process articles, you will need to initialise your
-session with either [Instapaper](http://www.instapaper.com/) or
-[Readability](http://www.readability.com/).
+session with one of [Instapaper](https://www.instapaper.com/),
+[Readability](https://www.readability.com/), or
+[Pocket](https://getpocket.com/).
 
 You can generate this by running:
 
@@ -103,13 +107,23 @@ or
 
         java -jar erudite.jar init readability
 
-For an [Instapaper](http://www.instapaper.com/) session, you will be
+or
+
+        java -jar erudite.jar init pocket
+
+For an [Instapaper](https://www.instapaper.com/) session, you will be
 prompted for your email and password. Neither of these are stored in the
 session file, only the session cookies (just like a browser).
 
-For [Readability](http://www.readability.com/), you will be directed to
+For [Readability](https://www.readability.com/), you will be directed to
 the web site to generate an API key and grant permission to Erudite to
 access your account.
+
+[Pocket](https://getpocket.com/) is a little more involved. Erudite will
+need your user ID and password, and will also directed to the web site to
+generate an API key and grant permission to Erudite to access your
+account. Neither the user ID or password are stored in the session file,
+only the session cookies (just like a browser).
 
 ## Create your Configuration
 

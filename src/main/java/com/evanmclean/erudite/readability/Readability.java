@@ -82,19 +82,19 @@ public class Readability
     private final String articleId;
     private final String bookmarkId;
     private final String title;
-    private final String sourceUrl;
+    private final String originalUrl;
     private final String summary;
     private final ImmutableMap<String, String> tags;
     private Element _text;
 
     Article( final String article_id, final String bookmark_id,
-        final String title, final String source_url, final String summary,
+        final String title, final String original_url, final String summary,
         final ImmutableMap<String, String> tags )
     {
       this.articleId = article_id;
       this.bookmarkId = bookmark_id;
       this.title = title;
-      this.sourceUrl = source_url;
+      this.originalUrl = original_url;
       this.summary = summary;
       this.tags = tags;
     }
@@ -108,7 +108,6 @@ public class Readability
       request(Verb.POST //
         , BASE_URL + "/bookmarks/" + Esc.url.text(bookmarkId) + "/tags" //
         , ImmutableMap.of("tags", add_tags)).close();
-
     }
 
     @SuppressWarnings( "synthetic-access" )
@@ -137,7 +136,7 @@ public class Readability
     @Override
     public String getOriginalUrl()
     {
-      return sourceUrl;
+      return originalUrl;
     }
 
     @Override
@@ -242,7 +241,7 @@ public class Readability
     {
       final StringBuilder buff = new StringBuilder(title);
 
-      buff.append("\n  ").append(sourceUrl) //
+      buff.append("\n  ").append(originalUrl) //
       ;
 
       if ( Str.isNotEmpty(summary) )

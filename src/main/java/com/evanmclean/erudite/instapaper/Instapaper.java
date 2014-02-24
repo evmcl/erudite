@@ -37,7 +37,7 @@ public class Instapaper
   private class Article implements InstapaperArticle
   {
     private final String title;
-    private final String sourceUrl;
+    private final String originalUrl;
     private final String summary;
     private final String textUrl;
     private final String archiveUrl;
@@ -45,12 +45,12 @@ public class Instapaper
     private final String deleteUrl;
     private Element _text;
 
-    Article( final String title, final String source_url, final String summary,
-        final String text_url, final String archive_url, final String move_url,
-        final String delete_url )
+    Article( final String title, final String original_url,
+        final String summary, final String text_url, final String archive_url,
+        final String move_url, final String delete_url )
     {
       this.title = title;
-      this.sourceUrl = source_url;
+      this.originalUrl = original_url;
       this.summary = summary;
       this.textUrl = text_url;
       this.archiveUrl = archive_url;
@@ -70,13 +70,13 @@ public class Instapaper
     @Override
     public String getOriginalUrl()
     {
-      return sourceUrl;
+      return originalUrl;
     }
 
     @Override
     public String getSourceUrl()
     {
-      return "http://www.instapaper.com/text?u=" + Esc.url.text(sourceUrl);
+      return "https://www.instapaper.com/text?u=" + Esc.url.text(originalUrl);
     }
 
     @Override
@@ -163,7 +163,7 @@ public class Instapaper
     {
       final StringBuilder buff = new StringBuilder(title);
 
-      buff.append("\n  ").append(sourceUrl) //
+      buff.append("\n  ").append(originalUrl) //
           .append("\n  Text: ").append(textUrl) //
           .append("\n  Archive: ").append(archiveUrl) //
           .append("\n  Move: ").append(moveUrl) //

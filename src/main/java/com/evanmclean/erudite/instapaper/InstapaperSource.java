@@ -116,7 +116,7 @@ class InstapaperSource implements Source
   @Override
   public String getViaHtml()
   {
-    return "<a href=\"http://www.instapaper.com/\">Instapaper</a>";
+    return "<a href=\"https://www.instapaper.com/\">Instapaper</a>";
   }
 
   @Override

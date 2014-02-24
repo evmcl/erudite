@@ -28,6 +28,7 @@ import com.evanmclean.erudite.jline.ConsoleReader;
 import com.evanmclean.erudite.logback.ConsoleLogging;
 import com.evanmclean.erudite.logback.Logback;
 import com.evanmclean.erudite.misc.Utils;
+import com.evanmclean.erudite.pocket.Pocket;
 import com.evanmclean.erudite.readability.Readability;
 import com.evanmclean.erudite.sessions.Session;
 import com.evanmclean.erudite.sessions.SessionIO;
@@ -149,6 +150,10 @@ public class Main
         session = initReadability();
         break;
 
+      case POCKET:
+        session = initPocket();
+        break;
+
       default:
         throw new IllegalStateException(
             "Don't know what to do for the source: " + source);
@@ -209,6 +214,68 @@ public class Main
     }
   }
 
+  private static Session initPocket() throws Exception
+  {
+    final Logger log = LoggerFactory.getLogger(Main.class);
+    final ConsoleReader console = new ConsoleReader();
+    try
+    {
+      log.info("Need your credentials for Pocket.");
+      log.info("(Note: Your password is not stored. Only session cookies are stored.)");
+
+      final String user = Str.trimToNull(console.readLine("Username: "));
+      if ( user == null )
+      {
+        console.getTerminal().setEchoEnabled(true);
+        log.error("No username address specified.");
+        return null;
+      }
+
+      final String pass = console.readLine("Pass: ", Utils.IS_WINDOWS ? '*'
+          : '\u0000');
+      console.println();
+      console.getTerminal().setEchoEnabled(true);
+      if ( Str.isEmpty(pass) )
+      {
+        log.error("No password specified.");
+        return null;
+      }
+
+      log.info("Open the URL: {}", Pocket.API_KEY_URL);
+      log.info("and create an API key. Enter the consumer key here.");
+
+      final String key = Str.trimToNull(console.readLine("Key: "));
+      if ( key == null )
+      {
+        console.getTerminal().setEchoEnabled(true);
+        log.error("No key specified.");
+        return null;
+      }
+
+      final Pocket.Authoriser authoriser = Pocket
+          .getAuthoriser(user, pass, key);
+      final String url = authoriser.getUrl();
+      try
+      {
+        Desktop.getDesktop().browse(new URI(url));
+        log.info("Opening {} in browser.", url);
+      }
+      catch ( Exception ex )
+      {
+        log.info("Open the URL: {}", url);
+      }
+      log.info("Click \"Authorize\". Once you are back at the main pocket window, press Enter to continue.");
+
+      console.readLine("Enter to continue: ");
+
+      return authoriser.getSession();
+    }
+    finally
+    {
+      console.getTerminal().setEchoEnabled(true);
+    }
+  }
+
   private static Session initReadability() throws Exception
   {
     final Logger log = LoggerFactory.getLogger(Main.class);
@@ -242,7 +309,7 @@ public class Main
         Desktop.getDesktop().browse(new URI(url));
         log.info("Opening {} in browser.", url);
       }
-      catch ( IOException ex )
+      catch ( Exception ex )
       {
         log.info("Open the URL: {}", url);
       }
