@@ -1,6 +1,7 @@
 package com.evanmclean.erudite;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.TreeMap;
 
 import org.jsoup.Connection;
@@ -11,10 +12,10 @@ import org.slf4j.LoggerFactory;
 import com.evanmclean.erudite.misc.Conn;
 import com.evanmclean.evlib.escape.Esc;
 import com.evanmclean.evlib.lang.Str;
-import com.evanmclean.evlib.misc.Conv;
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -29,29 +30,47 @@ import com.google.common.collect.ImmutableList;
  */
 public final class HNSearch
 {
+  private static class HNHits
+  {
+    final List<HNItem> hits;
+
+    @SuppressWarnings( "unused" )
+    public HNHits( @JsonProperty( "hits" ) final List<HNItem> hits )
+    {
+      this.hits = hits;
+    }
+
+  }
+
   private static class HNItem implements Comparable<HNItem>
   {
-    private final String id;
-    private final String createTs;
-    private final int numComments;
+    final String objectID;
+    final String url;
+    final int create_at_i;
+    final int num_comments;
 
-    public HNItem( final String id, final String create_ts,
-        final int num_comments )
+    @SuppressWarnings( "unused" )
+    public HNItem( @JsonProperty( "objectID" ) final String objectID,
+        @JsonProperty( "url" ) final String url //
+        , @JsonProperty( "create_at_i" ) final int create_at_i //
+        , @JsonProperty( "num_comments" ) final int num_comments //
+    )
     {
-      this.id = id;
-      this.createTs = create_ts;
-      this.numComments = num_comments;
+      this.objectID = objectID;
+      this.url = url;
+      this.create_at_i = create_at_i;
+      this.num_comments = num_comments;
     }
 
     @Override
     public int compareTo( final HNItem rhs )
     {
-      int ret = rhs.numComments - numComments;
+      int ret = rhs.num_comments - num_comments;
       if ( ret == 0 )
       {
-        ret = Str.ifNull(createTs).compareTo(Str.ifNull(rhs.createTs));
+        ret = create_at_i - rhs.create_at_i;
         if ( ret == 0 )
-          ret = Str.ifNull(id).compareTo(Str.ifNull(rhs.id));
+          ret = Str.ifNull(objectID).compareTo(Str.ifNull(rhs.objectID));
       }
       return ret;
     }
@@ -66,21 +85,23 @@ public final class HNSearch
       if ( getClass() != obj.getClass() )
         return false;
       HNItem other = (HNItem) obj;
-      if ( numComments != other.numComments )
+      if ( create_at_i != other.create_at_i )
         return false;
-      if ( id == null )
+      if ( num_comments != other.num_comments )
+        return false;
+      if ( objectID == null )
       {
-        if ( other.id != null )
+        if ( other.objectID != null )
           return false;
       }
-      else if ( !id.equals(other.id) )
+      else if ( !objectID.equals(other.objectID) )
         return false;
-      if ( createTs == null )
+      if ( url == null )
       {
-        if ( other.createTs != null )
+        if ( other.url != null )
           return false;
       }
-      else if ( !createTs.equals(other.createTs) )
+      else if ( !url.equals(other.url) )
         return false;
       return true;
     }
@@ -90,16 +111,15 @@ public final class HNSearch
     {
       final int prime = 31;
       int result = 1;
-      result = prime * result + ((createTs == null) ? 0 : createTs.hashCode());
-      result = prime * result + ((id == null) ? 0 : id.hashCode());
-      result = prime * result + numComments;
+      result = prime * result + create_at_i;
+      result = prime * result + num_comments;
+      result = prime * result + ((objectID == null) ? 0 : objectID.hashCode());
+      result = prime * result + ((url == null) ? 0 : url.hashCode());
       return result;
     }
-
   }
 
   public static final ImmutableList<String> EMPTY = ImmutableList.of();
-
   private static final LoadingCache<String, ImmutableList<String>> cache = createCache();
 
   /**
@@ -141,6 +161,7 @@ public final class HNSearch
   {
     return CacheBuilder.newBuilder().maximumSize(20)
         .build(new CacheLoader<String, ImmutableList<String>>() {
+          @SuppressWarnings( "synthetic-access" )
           @Override
           public ImmutableList<String> load( final String source_url )
           {
@@ -148,9 +169,10 @@ public final class HNSearch
             try
             {
               log.trace("HNSearch.com lookup: {}", source_url);
-              final String hnsearch_url = "http://api.thriftdb.com/api.hnsearch.com/items/_search?filter[fields][url]="
+              final String hnsearch_url = "http://hn.algolia.com/api/v1/search?tags=story&query="
                   + Esc.url.text(source_url);
               final Connection conn = Conn.connect(hnsearch_url);
+              conn.ignoreContentType(true);
               final Response resp = conn.execute();
               if ( resp.statusCode() != 200 )
               {
@@ -161,91 +183,49 @@ public final class HNSearch
 
               // Parse json return.
               final String body = resp.body();
-              final JsonParser parser = new JsonFactory()
-                  .createJsonParser(body);
-
-              // Ensure we are at the start of a JSON object.
-              if ( parser.nextToken() != JsonToken.START_OBJECT )
-              {
-                log.trace("Returned data from {} not a JSON object: {}",
-                  hnsearch_url, body);
-                return EMPTY;
-              }
-
-              // Find the results array.
-              JsonToken token;
-              while ( (token = parser.nextValue()) != null )
-                if ( (token == JsonToken.START_ARRAY)
-                    && "results".equals(parser.getCurrentName()) )
-                  break;
-
-              if ( token == null )
-              {
-                log.trace(
-                  "Could not find results array in JSON object from {}: {}",
-                  hnsearch_url, body);
-                return EMPTY;
-              }
-
-              // Now look for objects with field name of item.
-              while ( token != null )
-              {
-                final TreeMap<HNItem, String> items = new TreeMap<HNItem, String>();
-                while ( (token = parser.nextValue()) != null )
-                  if ( (token == JsonToken.START_OBJECT)
-                      && "item".equals(parser.getCurrentName()) )
-                  {
-                    String id = null;
-                    String url = null;
-                    String create_ts = null;
-                    int num_comments = -2;
-                    while ( (token = parser.nextValue()) != null )
-                    {
-                      if ( token == JsonToken.END_OBJECT )
-                        break;
-                      if ( "id".equals(parser.getCurrentName()) )
-                        id = parser.getText();
-                      else if ( "url".equals(parser.getCurrentName()) )
-                        url = parser.getText();
-                      else if ( "create_ts".equals(parser.getCurrentName()) )
-                        create_ts = parser.getText();
-                      else if ( "num_comments".equals(parser.getCurrentName()) )
-                        num_comments = Conv.toInt(parser.getText(), -1);
-                    }
-
-                    if ( source_url.equals(url) && (id != null) )
-                    {
-                      // Found a match!
-                      final String hn_url = "http://news.ycombinator.com/item?id="
-                          + id;
-                      final String hn_surl = "https://news.ycombinator.com/item?id="
-                          + id;
-                      if ( (!source_url.equalsIgnoreCase(hn_url))
-                          && (!source_url.equalsIgnoreCase(hn_surl)) )
-                      {
-                        log.trace("Hacker News discussion for {} is {}",
-                          source_url, hn_surl);
-                        items.put(new HNItem(id, create_ts, num_comments),
-                          hn_surl);
-                      }
-                    }
-                  }
-                if ( items.isEmpty() )
-                  return EMPTY;
-                return ImmutableList.copyOf(items.values());
-              }
-
-              log.trace("No Hacker News discussion thread for {}", source_url);
-              return EMPTY;
+              return parse(body, source_url);
             }
             catch ( IOException ex )
             {
+              ex.printStackTrace(); // emmark
               log.trace("Exception while looking up hnsearch.com for: "
                   + source_url, ex);
               return EMPTY;
             }
           }
         });
+  }
+
+  private static ImmutableList<String> parse( final String json,
+      final String source_url ) throws JsonParseException, IOException
+  {
+    final Logger log = LoggerFactory.getLogger(HNSearch.class);
+
+    final ObjectMapper om = new ObjectMapper();
+    om.configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, true);
+    om.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    final HNHits hits = om.readValue(json, HNHits.class);
+    final TreeMap<HNItem, String> items = new TreeMap<HNItem, String>();
+    for ( final HNItem item : hits.hits )
+      if ( source_url.equals(item.url) && Str.isNotEmpty(item.objectID) )
+      {
+        final String hn_url = "http://news.ycombinator.com/item?id="
+            + item.objectID;
+        final String hn_surl = "https://news.ycombinator.com/item?id="
+            + item.objectID;
+        if ( (!source_url.equalsIgnoreCase(hn_url))
+            && (!source_url.equalsIgnoreCase(hn_surl)) )
+        {
+          log.trace("Hacker News discussion for {} is {}", source_url, hn_surl);
+          items.put(item, hn_surl);
+        }
+      }
+    if ( items.isEmpty() )
+    {
+      log.trace("No Hacker News discussion thread for {}", source_url);
+      return EMPTY;
+    }
+    return ImmutableList.copyOf(items.values());
   }
 
   private HNSearch()
