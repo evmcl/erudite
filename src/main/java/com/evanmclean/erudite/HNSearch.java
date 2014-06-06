@@ -22,9 +22,9 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 
 /**
- * Performs an API lookup of HNSearch.com to see if the article has featured on
- * Hacker News and if so, returns the discussion thread URL.
- * 
+ * Performs an API lookup of hn.algolia.com to see if the article has featured
+ * on Hacker News and if so, returns the discussion thread URL.
+ *
  * @author Evan M<sup>c</sup>Lean, <a href="http://evanmclean.com/"
  *         target="_blank">M<sup>c</sup>Lean Computer Services</a>
  */
@@ -54,7 +54,7 @@ public final class HNSearch
         @JsonProperty( "url" ) final String url //
         , @JsonProperty( "create_at_i" ) final int create_at_i //
         , @JsonProperty( "num_comments" ) final int num_comments //
-    )
+        )
     {
       this.objectID = objectID;
       this.url = url;
@@ -119,8 +119,58 @@ public final class HNSearch
     }
   }
 
+  private static class Source
+  {
+    final String sourceUrl;
+    final String title;
+
+    Source( final String source_url, final String title )
+    {
+      this.sourceUrl = source_url;
+      this.title = title;
+    }
+
+    @Override
+    public boolean equals( final Object obj )
+    {
+      if ( this == obj )
+        return true;
+      if ( obj == null )
+        return false;
+      if ( getClass() != obj.getClass() )
+        return false;
+      Source other = (Source) obj;
+      if ( sourceUrl == null )
+      {
+        if ( other.sourceUrl != null )
+          return false;
+      }
+      else if ( !sourceUrl.equals(other.sourceUrl) )
+        return false;
+      if ( title == null )
+      {
+        if ( other.title != null )
+          return false;
+      }
+      else if ( !title.equals(other.title) )
+        return false;
+      return true;
+    }
+
+    @Override
+    public int hashCode()
+    {
+      final int prime = 31;
+      int result = 1;
+      result = prime * result
+          + ((sourceUrl == null) ? 0 : sourceUrl.hashCode());
+      result = prime * result + ((title == null) ? 0 : title.hashCode());
+      return result;
+    }
+  }
+
   public static final ImmutableList<String> EMPTY = ImmutableList.of();
-  private static final LoadingCache<String, ImmutableList<String>> cache = createCache();
+  private static final LoadingCache<Source, ImmutableList<String>> cache = createCache();
 
   /**
    * Removes all lookups in the cache.
@@ -130,54 +180,77 @@ public final class HNSearch
     cache.invalidateAll();
   }
 
-  public static ImmutableList<String> lookup( final Article article )
-  {
-    return lookup(article.getOriginalUrl());
-  }
-
   /**
    * Finds the URLs of the discussion threads on Hacker News for a web page.
-   * 
-   * @param source_url
-   *        The URL to look up.
+   *
+   * @param article
+   *        The Article to look up.
    * @return The URLs of the discussion threads on Hacker News, sorted by most
    *         comments, or an empty list.
    */
-  public static ImmutableList<String> lookup( final String source_url )
+  public static ImmutableList<String> lookup( final Article article )
   {
     try
     {
-      return cache.get(source_url);
+      return cache
+          .get(new Source(article.getOriginalUrl(), article.getTitle()));
     }
     catch ( Exception ex )
     {
       LoggerFactory.getLogger(HNSearch.class).trace(
-        "Error while HNSearch for " + source_url, ex);
+        "Error while HNSearch for " + article.getOriginalUrl(), ex);
       return ImmutableList.of();
     }
   }
 
-  private static LoadingCache<String, ImmutableList<String>> createCache()
+  private static LoadingCache<Source, ImmutableList<String>> createCache()
   {
     return CacheBuilder.newBuilder().maximumSize(20)
-        .build(new CacheLoader<String, ImmutableList<String>>() {
-          @SuppressWarnings( "synthetic-access" )
+        .build(new CacheLoader<Source, ImmutableList<String>>() {
           @Override
-          public ImmutableList<String> load( final String source_url )
+          public ImmutableList<String> load( final Source source )
           {
             final Logger log = LoggerFactory.getLogger(HNSearch.class);
             try
             {
-              log.trace("HNSearch.com lookup: {}", source_url);
-              final String hnsearch_url = "http://hn.algolia.com/api/v1/search?tags=story&query="
-                  + Esc.url.text(source_url);
+              log.trace("hn.algolia.com lookup: {} {}", source.sourceUrl,
+                source.title);
+              ImmutableList<String> results = search(source.sourceUrl,
+                source.sourceUrl);
+              if ( results.isEmpty() && Str.isNotEmpty(source.title) )
+              {
+                log.trace("Could not find match based on URL, so searching on title instead.");
+                results = search(source.title, source.sourceUrl);
+              }
+              if ( results.isEmpty() )
+                log.trace("No Hacker News discussion thread for {}",
+                  source.sourceUrl);
+              return results;
+            }
+            catch ( Exception ex )
+            {
+              log.trace("Exception while looking up hn.algolia.com for: "
+                  + source.sourceUrl, ex);
+              return EMPTY;
+            }
+          }
+
+          @SuppressWarnings( "synthetic-access" )
+          private ImmutableList<String> search( final String term,
+              final String source_url )
+          {
+            try
+            {
+              final String hnsearch_url = "http://hn.algolia.com/api/v1/search_by_date?tags=story&query="
+                  + Esc.url.text(term);
               final Connection conn = Conn.connect(hnsearch_url);
               conn.ignoreContentType(true);
               final Response resp = conn.execute();
               if ( resp.statusCode() != 200 )
               {
-                log.trace("GET {} returned {}: " + resp.statusMessage(),
-                  hnsearch_url, String.valueOf(resp.statusCode()));
+                LoggerFactory.getLogger(HNSearch.class).trace(
+                  "GET {} returned {}: " + resp.statusMessage(), hnsearch_url,
+                  String.valueOf(resp.statusCode()));
                 return EMPTY;
               }
 
@@ -187,9 +260,8 @@ public final class HNSearch
             }
             catch ( IOException ex )
             {
-              ex.printStackTrace(); // emmark
-              log.trace("Exception while looking up hnsearch.com for: "
-                  + source_url, ex);
+              LoggerFactory.getLogger(HNSearch.class).trace(
+                "Exception while looking up hn.algolia.com for: " + term, ex);
               return EMPTY;
             }
           }
@@ -197,8 +269,8 @@ public final class HNSearch
   }
 
   private static ImmutableList<String> parse( final String json,
-      final String source_url ) throws JsonParseException, IOException
-  {
+    final String source_url ) throws JsonParseException, IOException
+    {
     final Logger log = LoggerFactory.getLogger(HNSearch.class);
 
     final ObjectMapper om = new ObjectMapper();
@@ -221,12 +293,9 @@ public final class HNSearch
         }
       }
     if ( items.isEmpty() )
-    {
-      log.trace("No Hacker News discussion thread for {}", source_url);
       return EMPTY;
-    }
     return ImmutableList.copyOf(items.values());
-  }
+    }
 
   private HNSearch()
   {
