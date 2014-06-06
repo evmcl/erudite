@@ -2,7 +2,6 @@ package com.evanmclean.erudite;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.LoggerFactory;
@@ -10,11 +9,11 @@ import org.slf4j.LoggerFactory;
 import com.evanmclean.erudite.cli.Args;
 import com.evanmclean.evlib.io.Files;
 import com.evanmclean.evlib.lang.Str;
-import com.google.common.io.InputSupplier;
+import com.google.common.io.ByteSource;
 
 /**
  * Loads {@link Template}s.
- * 
+ *
  * @author Evan M<sup>c</sup>Lean, <a href="http://evanmclean.com/"
  *         target="_blank">M<sup>c</sup>Lean Computer Services</a>
  */
@@ -23,18 +22,17 @@ public class TemplateFactory
   private static final String DEFAULT_TEMPLATE_KEY = "__erudite_default_template_key";
 
   private final ConcurrentHashMap<String, Template> templates = new ConcurrentHashMap<String, Template>();
-  private final InputSupplier<? extends InputStream> defaultTemplateSupplier;
+  private final ByteSource defaultTemplateSupplier;
   private final Object[] lock = new Object[0];
 
   /**
    * Construct the template factory.
-   * 
+   *
    * @param default_template
    *        Input supplier for loading the default template (if needed).
    * @see #getDefault()
    */
-  public TemplateFactory(
-      final InputSupplier<? extends InputStream> default_template )
+  public TemplateFactory( final ByteSource default_template )
   {
     this.defaultTemplateSupplier = default_template;
   }
@@ -43,7 +41,7 @@ public class TemplateFactory
    * Loads the {@link Template} from the specified HTML file. If
    * <code>file</code> is <code>null</code> then same as calling
    * {@link #getDefault()}.
-   * 
+   *
    * @param file
    * @return The template.
    * @throws IOException
@@ -76,7 +74,7 @@ public class TemplateFactory
    * file (no folder info) it will look for the file in the current directory
    * and failing that, the erudite application folder (e.g.,
    * <code>~/.erudite</code>).
-   * 
+   *
    * @param filename
    * @return The template.
    * @throws IOException
@@ -101,7 +99,7 @@ public class TemplateFactory
   /**
    * Loads the default template. This will either be the internally stored
    * template, or the template for the session file (if it exists).
-   * 
+   *
    * @return The default template.
    * @throws IOException
    */

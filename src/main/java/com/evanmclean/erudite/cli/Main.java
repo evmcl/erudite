@@ -40,7 +40,7 @@ import com.google.common.io.Files;
 
 /**
  * Main entry point for the command line application.
- * 
+ *
  * @author Evan M<sup>c</sup>Lean, <a href="http://evanmclean.com/"
  *         target="_blank">M<sup>c</sup>Lean Computer Services</a>
  */
@@ -115,18 +115,18 @@ public class Main
     {
       System.out.println("The configuration file already exists.");
       System.out.println("Delete or rename " + config_file.toString()
-          + " first.");
+        + " first.");
       return 1;
     }
 
-    Files.copy(Args.getSampleConfig(), config_file);
+    Args.getSampleConfig().copyTo(Files.asByteSink(config_file));
     System.out.println("Generated configuration file: "
         + config_file.toString());
     return 0;
   }
 
   private static int init( final SourceType source, final File session_file )
-    throws Exception
+      throws Exception
   {
     final Logger log = LoggerFactory.getLogger(Main.class);
 
@@ -156,7 +156,7 @@ public class Main
 
       default:
         throw new IllegalStateException(
-            "Don't know what to do for the source: " + source);
+          "Don't know what to do for the source: " + source);
     }
 
     if ( session == null )
@@ -316,7 +316,7 @@ public class Main
       log.info("Click \"Allow\" and enter the verifier key here.");
 
       final String verifier_key = Str.trimToNull(console
-          .readLine("Verifier Key: "));
+        .readLine("Verifier Key: "));
       if ( verifier_key == null )
       {
         console.getTerminal().setEchoEnabled(true);
@@ -333,7 +333,7 @@ public class Main
   }
 
   private static int list( final File session_file, final File config_file )
-    throws IOException,
+      throws IOException,
       ClassNotFoundException,
       ConfigurationException
   {
@@ -358,9 +358,9 @@ public class Main
 
   private static int process( final File session_file, final File config_file,
       final TemplateFactory tf, final boolean quiet )
-    throws IOException,
-      ClassNotFoundException,
-      ConfigurationException
+          throws IOException,
+          ClassNotFoundException,
+          ConfigurationException
   {
     final Logger log = LoggerFactory.getLogger(Main.class);
     final Session session = SessionIO.read(session_file);
@@ -402,7 +402,7 @@ public class Main
 
           for ( int xi = 0; xi < thrds.length; ++xi )
             thrds[xi] = new ProcessorThread(articles, erudite, source, ihf,
-                processors, new File(tmp_folder, "worker" + xi));
+              processors, new File(tmp_folder, "worker" + xi));
 
           for ( ProcessorThread thrd : thrds )
             thrd.start();
@@ -437,11 +437,11 @@ public class Main
     {
       System.out.println("The template file already exists.");
       System.out.println("Delete or rename " + template_file.toString()
-          + " first.");
+        + " first.");
       return 1;
     }
 
-    Files.copy(Args.getInternalTemplate(), template_file);
+    Args.getInternalTemplate().copyTo(Files.asByteSink(template_file));
     System.out.println("Generated template file: " + template_file.toString());
     return 0;
   }

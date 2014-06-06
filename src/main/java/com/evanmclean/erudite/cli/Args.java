@@ -2,7 +2,6 @@ package com.evanmclean.erudite.cli;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Arrays;
 
 import org.apache.commons.cli.CommandLine;
@@ -21,12 +20,12 @@ import com.evanmclean.evlib.io.Files;
 import com.evanmclean.evlib.lang.Arr;
 import com.evanmclean.evlib.lang.Str;
 import com.evanmclean.evlib.lang.Sys;
-import com.google.common.io.InputSupplier;
+import com.google.common.io.ByteSource;
 import com.google.common.io.Resources;
 
 /**
  * Parses the command line arguments.
- * 
+ *
  * @author Evan M<sup>c</sup>Lean, <a href="http://evanmclean.com/"
  *         target="_blank">M<sup>c</sup>Lean Computer Services</a>
  */
@@ -37,7 +36,7 @@ public class Args
    * <code>user.home</code> system property it is usually
    * <code>$HOME\erudite</code> for Windows or <code>$HOME/.erudite</code> for
    * others.
-   * 
+   *
    * @return Returns the user data folder used by the application.
    */
   public static File defUserDataFolder()
@@ -56,27 +55,27 @@ public class Args
 
   /**
    * Get the internal template that resides in the application's jar file.
-   * 
+   *
    * @return Get the internal template that resides in the application's jar
    *         file.
    */
-  public static InputSupplier<InputStream> getInternalTemplate()
+  public static ByteSource getInternalTemplate()
   {
-    return Resources.newInputStreamSupplier(Resources
-        .getResource("com/evanmclean/erudite/template.html"));
+    return Resources.asByteSource(Resources
+      .getResource("com/evanmclean/erudite/template.html"));
   }
 
   /**
    * Get the sample configuration file that resides in the application's jar
    * file.
-   * 
+   *
    * @return Get the internal template that resides in the application's jar
    *         file.
    */
-  public static InputSupplier<InputStream> getSampleConfig()
+  public static ByteSource getSampleConfig()
   {
-    return Resources.newInputStreamSupplier(Resources
-        .getResource("com/evanmclean/erudite/sample_config.properties"));
+    return Resources.asByteSource(Resources
+      .getResource("com/evanmclean/erudite/sample_config.properties"));
   }
 
   /**
@@ -94,13 +93,13 @@ public class Args
     System.out.println();
 
     System.out
-        .println("Initialise a session, you must do this before you can process anything.");
+    .println("Initialise a session, you must do this before you can process anything.");
     System.out.println();
     System.out.println("usage: init <source> [<file>]");
     System.out.println();
     System.out.println("    <source>: Where you'll be pulling articles from.");
     System.out
-        .println("              One of \"instapaper\", \"readability\", or \"pocket\".");
+    .println("              One of \"instapaper\", \"readability\", or \"pocket\".");
     System.out.println();
     System.out.println("    <file>: Where to save the session data.");
     System.out.println("            Default is " + def_session_file.toString());
@@ -122,7 +121,7 @@ public class Args
     System.out.println();
     System.out.println("    <file>: Where to save the template file.");
     System.out
-        .println("            Default is " + def_template_file.toString());
+    .println("            Default is " + def_template_file.toString());
 
     System.out.println();
 
@@ -223,7 +222,7 @@ public class Args
 
   /**
    * Produce a new file with the same name, but with the extension replaced.
-   * 
+   *
    * @param file
    *        Original file.
    * @param new_extension
@@ -233,7 +232,7 @@ public class Args
   private static File relativeFile( final File file, final String new_extension )
   {
     return Files.getCanonicalFile(new File(FileName.sansExtension(file)
-        + new_extension));
+      + new_extension));
   }
 
   private static String[] tail( final String[] strs )
@@ -340,7 +339,7 @@ public class Args
           if ( Str.isEmpty(titleToTest) )
             throw new DisplayHelpException();
         }
-          break;
+        break;
 
         case PROCESS:
         {
@@ -394,7 +393,7 @@ public class Args
           if ( Arr.isNotEmpty(args.getArgs()) )
             throw new DisplayHelpException();
         }
-          break;
+        break;
 
         case LIST:
         {
@@ -421,7 +420,7 @@ public class Args
           if ( Arr.isNotEmpty(args.getArgs()) )
             throw new DisplayHelpException();
         }
-          break;
+        break;
 
         default:
           throw new DisplayHelpException();
@@ -439,7 +438,7 @@ public class Args
 
   /**
    * The action to be performed the the application.
-   * 
+   *
    * @return The action to be performed the the application.
    */
   public Action getAction()
@@ -449,7 +448,7 @@ public class Args
 
   /**
    * The configuration file that is being used.
-   * 
+   *
    * @return The configuration file that is being used.
    */
   public File getConfigFile()
@@ -459,7 +458,7 @@ public class Args
 
   /**
    * The level of logging that goes to the standard output.
-   * 
+   *
    * @return The level of logging that goes to the standard output.
    */
   public ConsoleLogging getConsoleLogging()
@@ -469,7 +468,7 @@ public class Args
 
   /**
    * The log file to write to.
-   * 
+   *
    * @return The log file to write to.
    */
   public File getLogFile()
@@ -486,7 +485,7 @@ public class Args
 
   /**
    * The session file that is being used.
-   * 
+   *
    * @return The session file that is being used.
    */
   public File getSessionFile()
@@ -496,7 +495,7 @@ public class Args
 
   /**
    * The type of source for articles (e.g., Instapaper) that is being used.
-   * 
+   *
    * @return The type of source for articles (e.g., Instapaper) that is being
    *         used.
    */
@@ -507,21 +506,21 @@ public class Args
 
   /**
    * The template to be used (unless overridden in the configuration file).
-   * 
+   *
    * @return The template to be used (unless overridden in the configuration
    *         file).
    */
-  public InputSupplier<? extends InputStream> getTemplate()
+  public ByteSource getTemplate()
   {
     if ( templateFile != null )
-      return com.google.common.io.Files.newInputStreamSupplier(templateFile);
+      return com.google.common.io.Files.asByteSource(templateFile);
     return getInternalTemplate();
   }
 
   /**
    * Path to the template file (if it is not using the one stored internally in
    * the jar file.)
-   * 
+   *
    * @return Path to the template file (if it is not using the one stored
    *         internally in the jar file.)
    */
@@ -532,7 +531,7 @@ public class Args
 
   /**
    * For {@link Action#TITLETEST}, the title to be tested.
-   * 
+   *
    * @return For {@link Action#TITLETEST}, the title to be tested.
    */
   public String getTitleToTest()
