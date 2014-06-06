@@ -28,7 +28,7 @@ import com.google.common.collect.ImmutableSortedMap;
 
 /**
  * Represents a login to the Instapaper service.
- * 
+ *
  * @author Evan M<sup>c</sup>Lean, <a href="http://evanmclean.com/"
  *         target="_blank">M<sup>c</sup>Lean Computer Services</a>
  */
@@ -46,9 +46,9 @@ public class Instapaper
     private Element _text;
 
     Article( final String title, final String original_url,
-        final String summary, final String text_url, final String archive_url,
-        final String move_url, final String delete_url )
-    {
+      final String summary, final String text_url, final String archive_url,
+      final String move_url, final String delete_url )
+      {
       this.title = title;
       this.originalUrl = original_url;
       this.summary = summary;
@@ -56,7 +56,7 @@ public class Instapaper
       this.archiveUrl = archive_url;
       this.moveUrl = move_url;
       this.deleteUrl = delete_url;
-    }
+      }
 
     @SuppressWarnings( "synthetic-access" )
     @Override
@@ -124,14 +124,14 @@ public class Instapaper
         final Element story = doc.getElementById("story");
         if ( story == null )
           throw new HasInstapaperLayoutChangedException(
-              "Could not find div#story for article: " + title);
+            "Could not find div#story for article: " + title);
 
         final List<Node> contents = story.childNodes();
         switch ( contents.size() )
         {
           case 0:
             throw new HasInstapaperLayoutChangedException(
-                "Empty div#story for article: " + title);
+              "Empty div#story for article: " + title);
           case 1:
           {
             Node node = contents.get(0);
@@ -164,10 +164,10 @@ public class Instapaper
       final StringBuilder buff = new StringBuilder(title);
 
       buff.append("\n  ").append(originalUrl) //
-          .append("\n  Text: ").append(textUrl) //
-          .append("\n  Archive: ").append(archiveUrl) //
-          .append("\n  Move: ").append(moveUrl) //
-          .append("\n  Delete: ").append(deleteUrl) //
+      .append("\n  Text: ").append(textUrl) //
+      .append("\n  Archive: ").append(archiveUrl) //
+      .append("\n  Move: ").append(moveUrl) //
+      .append("\n  Delete: ").append(deleteUrl) //
       ;
 
       if ( Str.isNotEmpty(summary) )
@@ -226,14 +226,11 @@ public class Instapaper
         final String title;
         final String text_url;
         {
-          final Element container = article.getElementsByClass("title_row")
+          final Element link = article.getElementsByClass("article_title")
               .first();
-          if ( container == null )
+          if ( (link == null) || (!"a".equalsIgnoreCase(link.tagName())) )
             continue;
           {
-            final Element link = container.getElementsByTag("a").first();
-            if ( link == null )
-              continue;
             title = titleMunger.munge(link.text());
             final String href = link.attr("href");
             if ( Str.isEmpty(title) || Str.isEmpty(href) )
@@ -261,49 +258,34 @@ public class Instapaper
         }
 
         final String archive_url;
+        final String delete_url;
+        final String move_url;
         {
           final Element container = article.getElementsByClass(
-            "primary_actions").first();
+            "article_actions").first();
           if ( container == null )
             throw new HasInstapaperLayoutChangedException(
-                "Cannot find div.primary_actions for article: " + title);
+                "Cannot find div.article_actions for article: " + title);
 
           String au = null;
+          String du = null;
 
           for ( Element link : container.getElementsByTag("a") )
           {
-            if ( link.hasClass("archive_button") )
+            if ( link.hasClass("js_archive_single") )
               au = link.attr("href");
+            else if ( link.hasClass("js_delete_single") )
+              du = link.attr("href");
           }
 
           if ( Str.isEmpty(au) )
             throw new HasInstapaperLayoutChangedException(
                 "Cannot find archive url for article: " + title);
-
-          archive_url = BASE_URL + au;
-        }
-
-        final String delete_url;
-        final String move_url;
-        {
-          final Element container = article.getElementsByClass(
-            "secondary_actions").first();
-          if ( container == null )
-            throw new HasInstapaperLayoutChangedException(
-                "Cannot find div.secondary_actions for article: " + title);
-
-          String du = null;
-
-          for ( Element link : container.getElementsByTag("a") )
-          {
-            if ( link.hasClass("delete_link") )
-              du = link.attr("href");
-          }
-
           if ( Str.isEmpty(du) || (du == null) )
             throw new HasInstapaperLayoutChangedException(
                 "Cannot find delete url for article: " + title);
 
+          archive_url = BASE_URL + au;
           delete_url = BASE_URL + du;
 
           // This is a bit of a kludge: We just generate the fragment of the
@@ -338,7 +320,7 @@ public class Instapaper
   /**
    * Create a {@link Session} for a login to the Instapaper service. Password is
    * not stored by the application, only session cookies.
-   * 
+   *
    * @param email
    *        The user's email address.
    * @param pass
@@ -348,7 +330,7 @@ public class Instapaper
    * @throws IOException
    */
   public static Session login( final String email, final String pass )
-    throws IOException
+      throws IOException
   {
     final Connection conn = Conn.connect(BASE_URL + "/user/login");
     conn.data("username", email, "password", pass);
@@ -368,7 +350,7 @@ public class Instapaper
   /**
    * Create a logged-in connection to Instapaper based on a session previously
    * produced by {@link #login(String, String)}.
-   * 
+   *
    * @param session
    *        The session object to use.
    * @param title_munger
@@ -387,7 +369,7 @@ public class Instapaper
 
   /**
    * Get a folder from Instapaper.
-   * 
+   *
    * @param name
    *        The name of the folder.
    * @return The folder, or <code>null</code> if it does not exist.
@@ -400,7 +382,7 @@ public class Instapaper
 
   /**
    * A list of all the folders on Instapaper.
-   * 
+   *
    * @return A list of all the folders on Instapaper.
    * @throws IOException
    */
@@ -412,7 +394,7 @@ public class Instapaper
   /**
    * Get the default folder (equivalent to
    * <code>getFolder(DEFAULT_FOLDER)</code>.)
-   * 
+   *
    * @return The default folder.
    * @throws IOException
    */
@@ -432,13 +414,13 @@ public class Instapaper
       final TreeMapIgnoreCase<Folder> map = Colls.newTreeMapIgnoreCase();
       {
         final Folder folder = new Folder(DEFAULT_FOLDER, DEFAULT_URL,
-            DEFAULT_ID);
+          DEFAULT_ID);
         folder._saveArticles(doc);
         log.trace("Folder: {} => {}", DEFAULT_FOLDER, DEFAULT_URL);
         map.put(folder.getName(), folder);
       }
 
-      final Elements folder_columns = doc.getElementsByClass("folder_column");
+      final Elements folder_columns = doc.getElementsByClass("folder_link");
       if ( (folder_columns == null) || folder_columns.isEmpty() )
         throw new HasInstapaperLayoutChangedException(
             "Could not find folder column.");
