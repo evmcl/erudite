@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.apache.commons.configuration.ConfigurationException;
@@ -14,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.evanmclean.erudite.Article;
+import com.evanmclean.erudite.Articles;
 import com.evanmclean.erudite.Erudite;
 import com.evanmclean.erudite.ImageHandlerFactory;
 import com.evanmclean.erudite.Processor;
@@ -341,19 +341,26 @@ public class Main
     final Session session = SessionIO.read(session_file);
     final Config config = ConfigReader.read(config_file);
     final Source source = session.getSource(config);
-    final List<? extends Article> articles = source.getArticles();
+    final Articles articles = source.getArticles();
+    int ret = 0;
 
-    if ( articles.isEmpty() )
+    for ( final String errmsg : articles.getErrors() )
+    {
+      log.error(errmsg);
+      ret = 1;
+    }
+
+    if ( articles.getArticles().isEmpty() && articles.getErrors().isEmpty() )
     {
       log.info("No articles to be processed.");
     }
     else
     {
-      for ( Article article : articles )
+      for ( final Article article : articles.getArticles() )
         log.info(article.getTitle());
     }
 
-    return 0;
+    return ret;
   }
 
   private static int process( final File session_file, final File config_file,
@@ -374,12 +381,18 @@ public class Main
     try
     {
       log.trace("Reading articles from {}", session.getSourceType());
+      final Articles arts = source.getArticles();
+      for ( final String errmsg : arts.getErrors() )
+      {
+        log.error(errmsg);
+        ret = 1;
+      }
       final ConcurrentLinkedQueue<Article> articles = new ConcurrentLinkedQueue<Article>(
-          source.getArticles());
+          arts.getArticles());
       final int numarticles = articles.size();
       if ( numarticles <= 0 )
       {
-        if ( quiet )
+        if ( quiet || (!arts.getErrors().isEmpty()) )
           log.debug("No articles to be processed.");
         else
           log.info("No articles to be processed.");
@@ -404,11 +417,11 @@ public class Main
             thrds[xi] = new ProcessorThread(articles, erudite, source, ihf,
               processors, new File(tmp_folder, "worker" + xi));
 
-          for ( ProcessorThread thrd : thrds )
+          for ( final ProcessorThread thrd : thrds )
             thrd.start();
 
           log.trace("Waiting on processing threads.");
-          for ( ProcessorThread thrd : thrds )
+          for ( final ProcessorThread thrd : thrds )
           {
             thrd.join();
             if ( thrd.anyErrors() )

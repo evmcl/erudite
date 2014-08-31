@@ -10,10 +10,10 @@
     <dependency org="commons-configuration" name="commons-configuration" rev="1.10" transitive="false" conf="default"/>
     <dependency org="commons-lang" name="commons-lang" rev="2.6" transitive="false" conf="default"/>
     <dependency org="com.google.code.findbugs" name="findbugs" rev="2.0.3" transitive="false" conf="default"/>
-    <dependency org="com.google.guava" name="guava" rev="17.0" transitive="false" conf="default"/>
-    <dependency org="com.fasterxml.jackson.core" name="jackson-annotations" rev="2.4.0" transitive="false" conf="default"/>
-    <dependency org="com.fasterxml.jackson.core" name="jackson-core" rev="2.4.0" transitive="false" conf="default"/>
-    <dependency org="com.fasterxml.jackson.core" name="jackson-databind" rev="2.4.0" transitive="false" conf="default"/>
+    <dependency org="com.google.guava" name="guava" rev="18.0" transitive="false" conf="default"/>
+    <dependency org="com.fasterxml.jackson.core" name="jackson-annotations" rev="2.4.1" transitive="false" conf="default"/>
+    <dependency org="com.fasterxml.jackson.core" name="jackson-core" rev="2.4.1" transitive="false" conf="default"/>
+    <dependency org="com.fasterxml.jackson.core" name="jackson-databind" rev="2.4.1" transitive="false" conf="default"/>
     <dependency org="jline" name="jline" rev="2.11" transitive="false" conf="default"/>
     <dependency org="org.jsoup" name="jsoup" rev="1.7.3" transitive="false" conf="default"/>
     <dependency org="junit" name="junit" rev="4.11" transitive="false" conf="default"/>

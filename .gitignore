@@ -1,3 +1,4 @@
 target
 .hg
 .hgignore
+.hgtags

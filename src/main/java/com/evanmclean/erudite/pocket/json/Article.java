@@ -27,6 +27,8 @@ public class Article
   private final String title;
   private final String excerpt;
   private final boolean favourite;
+  private final boolean isArticle;
+  private final boolean isUnprocessed;
   private final ImmutableSortedSet<String> tags;
 
   public Article( @JsonProperty( "item_id" ) final String item_id,
@@ -37,6 +39,11 @@ public class Article
       @JsonProperty( "resolved_title" ) final String resolved_title,
       @JsonProperty( "excerpt" ) final String excerpt,
       @JsonProperty( "favorite" ) final String favourite,
+      @JsonProperty( "has_image" ) final String has_image,
+      @JsonProperty( "has_video" ) final String has_video,
+      @JsonProperty( "is_article" ) final String is_article,
+      @JsonProperty( "is_index" ) final String is_index,
+      @JsonProperty( "word_count" ) final String word_count,
       @JsonProperty( "tags" ) final Map<String, Tag> tags )
   {
     this.itemId = item_id;
@@ -45,7 +52,11 @@ public class Article
     this.title = Str.ifEmpty(resolved_title, given_title);
     this.excerpt = excerpt;
     this.favourite = Str.notEquals(favourite, "0");
+    this.isArticle = Str.notEquals(is_article, "0");
     this.tags = getTagSet(tags);
+    this.isUnprocessed = Str.equals(is_article, "0")
+        && Str.equals(is_index, "0") && Str.equals(has_image, "0")
+        && Str.equals(has_video, "0") && Str.equals(word_count, "0");
   }
 
   public String getExcerpt()
@@ -83,7 +94,17 @@ public class Article
     return favourite;
   }
 
+  public boolean isUnprocessed()
+  {
+    return isUnprocessed && isValid();
+  }
+
   public boolean isUsable()
+  {
+    return isArticle && isValid();
+  }
+
+  private boolean isValid()
   {
     if ( Str.isEmpty(itemId) || Str.isEmpty(resolvedId) || Str.isEmpty(url)
         || Str.isEmpty(title) )

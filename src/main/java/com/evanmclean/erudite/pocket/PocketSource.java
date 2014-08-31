@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import com.evanmclean.erudite.Article;
+import com.evanmclean.erudite.Articles;
 import com.evanmclean.erudite.Source;
 import com.evanmclean.erudite.config.Config;
 import com.evanmclean.erudite.pocket.Pocket.Filter;
@@ -19,7 +20,7 @@ import com.google.common.collect.ImmutableSortedSet;
 
 /**
  * Source object for Pocket.
- * 
+ *
  * @author Evan M<sup>c</sup>Lean, <a href="http://evanmclean.com/"
  *         target="_blank">M<sup>c</sup>Lean Computer Services</a>
  */
@@ -74,7 +75,7 @@ class PocketSource implements Source
         pdbldr.put("favorite", fav.booleanValue() ? "1" : "0");
       if ( !inctags.isEmpty() )
         pdbldr.put("tag", inctags.first()); // Only include the first tag, not
-                                            // sure if you can include multiple.
+      // sure if you can include multiple.
 
       favourite = fav;
       post_data = pdbldr.build();
@@ -84,7 +85,7 @@ class PocketSource implements Source
       for ( final String tag : excluded_tags )
         if ( inctags.contains(tag) )
           throw new IllegalArgumentException("Specified filter of both " + tag
-              + " and !" + tag + '.');
+            + " and !" + tag + '.');
     }
 
     return new Filter() {
@@ -120,7 +121,7 @@ class PocketSource implements Source
   /**
    * Create the action based on a string from the configuration file. See
    * example configuration file in the user documentation.
-   * 
+   *
    * @param str
    * @return
    */
@@ -128,39 +129,39 @@ class PocketSource implements Source
   {
     if ( "archive".equalsIgnoreCase(str) )
       return new Action() {
-        @Override
-        public void run( final PocketArticle article ) throws IOException
-        {
-          article.archive();
-        }
-      };
+      @Override
+      public void run( final PocketArticle article ) throws IOException
+      {
+        article.archive();
+      }
+    };
 
     if ( Str.equalsOneOfIgnoreCase(str, "remove", "delete") )
       return new Action() {
-        @Override
-        public void run( final PocketArticle article ) throws IOException
-        {
-          article.remove();
-        }
-      };
+      @Override
+      public void run( final PocketArticle article ) throws IOException
+      {
+        article.remove();
+      }
+    };
 
     if ( Str.equalsOneOfIgnoreCase(str, "favourite", "favorite") )
       return new Action() {
-        @Override
-        public void run( final PocketArticle article ) throws IOException
-        {
-          article.favourite(true);
-        }
-      };
+      @Override
+      public void run( final PocketArticle article ) throws IOException
+      {
+        article.favourite(true);
+      }
+    };
 
     if ( Str.equalsOneOfIgnoreCase(str, "unfavourite", "unfavorite") )
       return new Action() {
-        @Override
-        public void run( final PocketArticle article ) throws IOException
-        {
-          article.favourite(false);
-        }
-      };
+      @Override
+      public void run( final PocketArticle article ) throws IOException
+      {
+        article.favourite(false);
+      }
+    };
 
     if ( Str.startsWithIgnoreCase(str, "tag:") )
     {
@@ -194,12 +195,12 @@ class PocketSource implements Source
 
     if ( Str.equalsOneOf(str, "none", "nothing", Str.EMPTY, null) )
       return new Action() {
-        @Override
-        public void run( final PocketArticle article )
-        {
-          // no action
-        }
-      };
+      @Override
+      public void run( final PocketArticle article )
+      {
+        // no action
+      }
+    };
 
     throw new IllegalArgumentException("Unknown Pocket action: " + str);
   }
@@ -216,7 +217,7 @@ class PocketSource implements Source
   }
 
   @Override
-  public ImmutableList<? extends Article> getArticles() throws IOException
+  public Articles getArticles() throws IOException
   {
     return pocket.getArticles();
   }

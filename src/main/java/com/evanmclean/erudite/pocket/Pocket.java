@@ -22,6 +22,7 @@ import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.evanmclean.erudite.Articles;
 import com.evanmclean.erudite.config.TitleMunger;
 import com.evanmclean.erudite.misc.Conn;
 import com.evanmclean.erudite.pocket.json.ActionResults;
@@ -44,7 +45,7 @@ import com.google.common.io.CharStreams;
 
 /**
  * Represents a login to the Pocket service.
- * 
+ *
  * @author Evan M<sup>c</sup>Lean, <a href="http://evanmclean.com/"
  *         target="_blank">M<sup>c</sup>Lean Computer Services</a>
  */
@@ -266,11 +267,6 @@ public class Pocket
     }
   }
 
-  static final String BASE_URL = "https://getpocket.com/";
-  static final String API_BASE_URL = BASE_URL + "v3";
-
-  public static String API_KEY_URL = BASE_URL + "developer/apps/new";
-
   public static Authoriser getAuthoriser( final String user, final String pass,
       final String key ) throws IOException
   {
@@ -313,20 +309,26 @@ public class Pocket
     return new Authoriser(key, code, cookies);
   }
 
+  static final String BASE_URL = "https://getpocket.com/";
+
+  static final String API_BASE_URL = BASE_URL + "v3";
+
+  public static String API_KEY_URL = BASE_URL + "developer/apps/new";
+
   private final String consumerKey;
   private final String accessToken;
   private final TitleMunger titleMunger;
   private final Filter filter;
   private final ObjectMapper json = new ObjectMapper();
   private final ImmutableMap<String, String> immutableGetArgs = ImmutableMap
-      .of("detailType", "complete", "contentType", "article");
+      .of("detailType", "complete");
   private ImmutableMap<String, String> scrapeCookies;
-  private ImmutableList<PocketArticle> _articles;
+  private Articles _articles;
 
   /**
    * Create a logged-in connection to Pocket based on a session previously
    * produced by {@link Authoriser}.
-   * 
+   *
    * @param session
    *        The session object to use.
    * @param filter
@@ -367,20 +369,21 @@ public class Pocket
     json.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
   }
 
-  public ImmutableList<PocketArticle> getArticles() throws IOException
+  public Articles getArticles() throws IOException
   {
-    ImmutableList<PocketArticle> articles = _articles;
+    Articles articles = _articles;
     if ( articles == null )
       _articles = articles = _getArticles();
     return articles;
   }
 
-  private ImmutableList<PocketArticle> _getArticles() throws IOException
+  private Articles _getArticles() throws IOException
   {
     final Logger log = LoggerFactory.getLogger(getClass());
     log.trace("Retrieving article list from Pocket.");
 
     final ImmutableList.Builder<PocketArticle> bldr = ImmutableList.builder();
+    final ImmutableList.Builder<String> errs = ImmutableList.builder();
 
     final InputStream resp = apiRequest(API_BASE_URL + "/get",
       combine(filter.getPostData(), immutableGetArgs));
@@ -388,11 +391,19 @@ public class Pocket
 
     for ( final com.evanmclean.erudite.pocket.json.Article article : get
         .getArticles() )
-      if ( article.isUsable() && (!filter.isFiltered(article)) )
-        bldr.add(new Article(article.getItemId(), titleMunger.munge(article
-            .getTitle()), article.getUrl(), article.getExcerpt()));
+      if ( article.isUsable() )
+      {
+        if ( !filter.isFiltered(article) )
+          bldr.add(new Article(article.getItemId(), titleMunger.munge(article
+              .getTitle()), article.getUrl(), article.getExcerpt()));
+      }
+      else if ( article.isUnprocessed() )
+      {
+        errs.add("Pocket does not appear to be able to process the article: "
+            + article.getTitle());
+      }
 
-    return bldr.build();
+    return new Articles(bldr.build(), errs.build());
   }
 
   private InputStream apiRequest( final String url,
@@ -432,6 +443,21 @@ public class Pocket
     ret.putAll(rhs);
     ret.putAll(lhs);
     return ret;
+  }
+
+  private <T> T readValue( final InputStream in, final Class<T> cls )
+    throws IOException
+  {
+    final ByteArrayInputOutputStream inout = new ByteArrayInputOutputStream();
+    ByteStreams.copy(in, inout);
+    {
+      final StringWriter out = new StringWriter(inout.size());
+      CharStreams.copy(new InputStreamReader(inout.getInputStream(),
+          Charsets.UTF8), out);
+      LoggerFactory.getLogger(getClass()).trace("Data returned: {}",
+        out.toString());
+    }
+    return json.readValue(inout.getInputStream(), cls);
   }
 
   @SuppressWarnings( "unused" )
@@ -486,20 +512,5 @@ public class Pocket
     {
       throw new UnhandledException(ex);
     }
-  }
-
-  private <T> T readValue( final InputStream in, final Class<T> cls )
-    throws IOException
-  {
-    final ByteArrayInputOutputStream inout = new ByteArrayInputOutputStream();
-    ByteStreams.copy(in, inout);
-    {
-      final StringWriter out = new StringWriter(inout.size());
-      CharStreams.copy(new InputStreamReader(inout.getInputStream(),
-          Charsets.UTF8), out);
-      LoggerFactory.getLogger(getClass()).trace("Data returned: {}",
-        out.toString());
-    }
-    return json.readValue(inout.getInputStream(), cls);
   }
 }

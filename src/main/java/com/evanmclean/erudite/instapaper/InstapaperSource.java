@@ -3,15 +3,15 @@ package com.evanmclean.erudite.instapaper;
 import java.io.IOException;
 
 import com.evanmclean.erudite.Article;
+import com.evanmclean.erudite.Articles;
 import com.evanmclean.erudite.Source;
 import com.evanmclean.erudite.config.Config;
 import com.evanmclean.erudite.sessions.Session;
 import com.evanmclean.evlib.lang.Str;
-import com.google.common.collect.ImmutableList;
 
 /**
  * Source object for Instapaper.
- * 
+ *
  * @author Evan M<sup>c</sup>Lean, <a href="http://evanmclean.com/"
  *         target="_blank">M<sup>c</sup>Lean Computer Services</a>
  */
@@ -28,7 +28,7 @@ class InstapaperSource implements Source
   /**
    * Create the action based on a string from the configuration file. See
    * example configuration file in the user documentation.
-   * 
+   *
    * @param ip
    * @param str
    * @return
@@ -97,14 +97,14 @@ class InstapaperSource implements Source
   }
 
   @Override
-  public ImmutableList<? extends Article> getArticles() throws IOException
+  public Articles getArticles() throws IOException
   {
     final InstapaperFolder folder = (articleFolder == null) ? ip
         .getReadLaterFolder() : ip.getFolder(articleFolder);
     if ( folder == null )
       throw new IOException("Unknown Instapaper folder: "
           + Str.ifNull(articleFolder, Instapaper.DEFAULT_FOLDER));
-    return folder.getArticles();
+    return new Articles(folder.getArticles());
   }
 
   @Override

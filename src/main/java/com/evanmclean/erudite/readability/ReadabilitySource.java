@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 
 import com.evanmclean.erudite.Article;
+import com.evanmclean.erudite.Articles;
 import com.evanmclean.erudite.Source;
 import com.evanmclean.erudite.config.Config;
 import com.evanmclean.erudite.readability.Readability.Filter;
@@ -12,13 +13,12 @@ import com.evanmclean.erudite.sessions.Session;
 import com.evanmclean.evlib.escape.Esc;
 import com.evanmclean.evlib.lang.Str;
 import com.evanmclean.evlib.util.TreeSetIgnoreCase;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSortedSet;
 
 /**
  * Source object for Readability.
- * 
+ *
  * @author Evan M<sup>c</sup>Lean, <a href="http://evanmclean.com/"
  *         target="_blank">M<sup>c</sup>Lean Computer Services</a>
  */
@@ -93,7 +93,7 @@ class ReadabilitySource implements Source
       for ( final String tag : excluded_tags )
         if ( inctags.contains(tag) )
           throw new IllegalArgumentException("Specified filter of both " + tag
-              + " and !" + tag + '.');
+            + " and !" + tag + '.');
     }
 
     return new Filter() {
@@ -128,7 +128,7 @@ class ReadabilitySource implements Source
   /**
    * Create the action based on a string from the configuration file. See
    * example configuration file in the user documentation.
-   * 
+   *
    * @param str
    * @return
    */
@@ -136,39 +136,39 @@ class ReadabilitySource implements Source
   {
     if ( "archive".equalsIgnoreCase(str) )
       return new Action() {
-        @Override
-        public void run( final ReadabilityArticle article ) throws IOException
-        {
-          article.archive();
-        }
-      };
+      @Override
+      public void run( final ReadabilityArticle article ) throws IOException
+      {
+        article.archive();
+      }
+    };
 
     if ( Str.equalsOneOfIgnoreCase(str, "remove", "delete") )
       return new Action() {
-        @Override
-        public void run( final ReadabilityArticle article ) throws IOException
-        {
-          article.remove();
-        }
-      };
+      @Override
+      public void run( final ReadabilityArticle article ) throws IOException
+      {
+        article.remove();
+      }
+    };
 
     if ( Str.equalsOneOfIgnoreCase(str, "favourite", "favorite") )
       return new Action() {
-        @Override
-        public void run( final ReadabilityArticle article ) throws IOException
-        {
-          article.favourite(true);
-        }
-      };
+      @Override
+      public void run( final ReadabilityArticle article ) throws IOException
+      {
+        article.favourite(true);
+      }
+    };
 
     if ( Str.equalsOneOfIgnoreCase(str, "unfavourite", "unfavorite") )
       return new Action() {
-        @Override
-        public void run( final ReadabilityArticle article ) throws IOException
-        {
-          article.favourite(false);
-        }
-      };
+      @Override
+      public void run( final ReadabilityArticle article ) throws IOException
+      {
+        article.favourite(false);
+      }
+    };
 
     if ( Str.startsWithIgnoreCase(str, "tag:") )
     {
@@ -200,12 +200,12 @@ class ReadabilitySource implements Source
 
     if ( Str.equalsOneOf(str, "none", "nothing", Str.EMPTY, null) )
       return new Action() {
-        @Override
-        public void run( final ReadabilityArticle article )
-        {
-          // no action
-        }
-      };
+      @Override
+      public void run( final ReadabilityArticle article )
+      {
+        // no action
+      }
+    };
 
     throw new IllegalArgumentException("Unknown Readability action: " + str);
   }
@@ -222,9 +222,9 @@ class ReadabilitySource implements Source
   }
 
   @Override
-  public ImmutableList<? extends Article> getArticles() throws IOException
+  public Articles getArticles() throws IOException
   {
-    return rd.getArticles();
+    return new Articles(rd.getArticles());
   }
 
   @Override
