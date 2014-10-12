@@ -15,7 +15,7 @@ class SubContent
    * otherwise it returns it as a JSON object where each key is the image ID
    * (which we ignore) and the value is another JSON object (which we process
    * below).
-   * 
+   *
    * @param obj
    * @return
    */
@@ -31,12 +31,12 @@ class SubContent
     }
 
     final ImmutableList.Builder<Image> images = ImmutableList.builder();
-    @SuppressWarnings( "unchecked" ) final Collection<Map<String, String>> maps = ((Map<Object, Map<String, String>>) obj)
+    @SuppressWarnings( "unchecked" ) final Collection<Map<String, Object>> maps = ((Map<Object, Map<String, Object>>) obj)
         .values();
-    for ( Map<String, String> map : maps )
+    for ( Map<String, Object> map : maps )
     {
-      final String image_id = map.get("image_id");
-      final String src = map.get("src");
+      final String image_id = String.valueOf(map.get("image_id"));
+      final String src = String.valueOf(map.get("src"));
       if ( Str.isEmpty(image_id) || Str.isEmpty(src) )
         throw new IllegalStateException("Invalid image declaration: " + map);
       images.add(new Image(image_id, src));
