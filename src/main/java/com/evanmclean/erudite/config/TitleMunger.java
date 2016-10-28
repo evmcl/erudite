@@ -12,18 +12,26 @@ import com.google.common.collect.ImmutableList;
  * of the article (i.e., the HTML document) to something more appropriate for
  * your e&ndash;book library. See the sample configuration in the user
  * documentation for examples.
- * 
- * @author Evan M<sup>c</sup>Lean, <a href="http://evanmclean.com/"
- *         target="_blank">M<sup>c</sup>Lean Computer Services</a>
+ *
+ * @author Evan M<sup>c</sup>Lean,
+ *         <a href="http://evanmclean.com/" target="_blank">M<sup>c</sup>Lean
+ *         Computer Services</a>
  */
 public class TitleMunger
 {
   /**
+   * Used for reducing all whitespace in titles to a single space.
+   */
+  private static Pattern WHITESPACE_REGEX = Pattern.compile("\\p{Space}+",
+    Pattern.UNICODE_CHARACTER_CLASS);
+
+  /**
    * Will build a title munger out of a set of <code>/regex/str/</code> regular
    * expression substitutions. First match wins.
-   * 
-   * @author Evan M<sup>c</sup>Lean, <a href="http://evanmclean.com/"
-   *         target="_blank">M<sup>c</sup>Lean Computer Services</a>
+   *
+   * @author Evan M<sup>c</sup>Lean,
+   *         <a href="http://evanmclean.com/" target="_blank">M<sup>c</sup>Lean
+   *         Computer Services</a>
    */
   public static class Builder
   {
@@ -34,7 +42,7 @@ public class TitleMunger
      * by the title munger. The substition can include arguments &ldquo;
      * <code>\1</code>&rdquo; through &ldquo;<code>\9</code>&rdquo; to
      * substitute values out of the regular expression.
-     * 
+     *
      * @param str
      * @return The builder object.
      */
@@ -46,7 +54,7 @@ public class TitleMunger
 
     /**
      * Build the title munger.
-     * 
+     *
      * @return The title munger.
      */
     @SuppressWarnings( "synthetic-access" )
@@ -85,8 +93,10 @@ public class TitleMunger
       if ( !mat.matches() )
         throw new IllegalArgumentException(
             "Expect regular expression in the form /regex/replace/: " + regex);
-      return new Munger(Pattern.compile(mat.group(1), Pattern.CASE_INSENSITIVE
-          | Pattern.UNICODE_CASE | Pattern.CANON_EQ), makerep(mat.group(2)));
+      return new Munger(
+          Pattern.compile(mat.group(1),
+            Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE | Pattern.CANON_EQ),
+          makerep(mat.group(2)));
     }
 
   }
@@ -126,7 +136,7 @@ public class TitleMunger
     /**
      * Perform the substitution operation on the string. Returns null if the
      * regular expression does not match or the result would be a blank string.
-     * 
+     *
      * @param str
      *        String to perform the substitution on.
      * @return The substituted string, or null if the regular expression does
@@ -163,7 +173,7 @@ public class TitleMunger
 
   /**
    * Create a title munger builder.
-   * 
+   *
    * @return A title munger builder.
    */
   public static Builder builder()
@@ -173,7 +183,7 @@ public class TitleMunger
 
   /**
    * Create a title munger that does no munging.
-   * 
+   *
    * @return A tile munger that does no munging.
    */
   public static TitleMunger empty()
@@ -191,7 +201,7 @@ public class TitleMunger
 
   /**
    * Perform the substitution operation on the string.
-   * 
+   *
    * @param str
    *        String to perform the substitution on.
    * @return The substituted string, or <code>str</code> trimmed of any leading
@@ -199,7 +209,9 @@ public class TitleMunger
    */
   public String munge( String str )
   {
-    str = Str.trimToNull(str);
+    if ( str == null )
+      return Str.EMPTY;
+    str = Str.trimToNull(WHITESPACE_REGEX.matcher(str).replaceAll(" "));
     if ( str == null )
       return Str.EMPTY;
     for ( Munger munger : mungers )
