@@ -11,15 +11,15 @@ import com.google.common.collect.ImmutableSortedSet;
 public class Article
 {
   private static ImmutableSortedSet<String> getTagSet(
-      final Map<String, Tag> map )
-  {
+    final Map<String, Tag> map )
+    {
     if ( map == null )
       return ImmutableSortedSet.of();
     final TreeSet<String> set = new TreeSet<String>(CompareCase.INSTANCE);
     for ( final Tag tag : map.values() )
       set.add(tag.getTag());
     return ImmutableSortedSet.copyOfSorted(set);
-  }
+    }
 
   private final String itemId;
   private final String resolvedId;
@@ -31,7 +31,8 @@ public class Article
   private final boolean isUnprocessed;
   private final ImmutableSortedSet<String> tags;
 
-  public Article( @JsonProperty( "item_id" ) final String item_id,
+  public Article(
+      @JsonProperty( "item_id" ) final String item_id,
       @JsonProperty( "resolved_id" ) final String resolved_id,
       @JsonProperty( "given_url" ) final String given_url,
       @JsonProperty( "resolved_url" ) final String resolved_url,
@@ -43,7 +44,7 @@ public class Article
       @JsonProperty( "has_video" ) final String has_video,
       @JsonProperty( "is_article" ) final String is_article,
       @JsonProperty( "is_index" ) final String is_index,
-      @JsonProperty( "word_count" ) final String word_count,
+      @SuppressWarnings( "unused" ) @JsonProperty( "word_count" ) final String word_count,
       @JsonProperty( "tags" ) final Map<String, Tag> tags )
   {
     this.itemId = item_id;
@@ -56,7 +57,7 @@ public class Article
     this.tags = getTagSet(tags);
     this.isUnprocessed = Str.equals(is_article, "0")
         && Str.equals(is_index, "0") && Str.equals(has_image, "0")
-        && Str.equals(has_video, "0") && Str.equals(word_count, "0");
+        && Str.equals(has_video, "0"); // && Str.equals(word_count, "0");
   }
 
   public String getExcerpt()
@@ -109,7 +110,7 @@ public class Article
     if ( Str.isEmpty(itemId) || Str.isEmpty(resolvedId) || Str.isEmpty(url)
         || Str.isEmpty(title) )
       return false;
-    // If resolved_id = 0 then hasn't been processed by readability yet, so
+    // If resolved_id = 0 then hasn't been processed by pocket yet, so
     // should skip.
     if ( Str.equals(resolvedId, "0") )
       return false;
