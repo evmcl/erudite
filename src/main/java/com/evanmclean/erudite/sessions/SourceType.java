@@ -19,10 +19,6 @@ public enum SourceType
    * <a href="https://getpocket.com/">Pocket</a>
    */
   , POCKET //
-  /**
-   * <a href="https://www.readability.com/">Readability</a>
-   */
-  , READABILITY //
   ;
 
   /**

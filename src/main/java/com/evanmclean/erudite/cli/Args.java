@@ -99,8 +99,7 @@ public class Args
     System.out.println("usage: init <source> [<file>]");
     System.out.println();
     System.out.println("    <source>: Where you'll be pulling articles from.");
-    System.out.println(
-      "              One of \"instapaper\", \"readability\", or \"pocket\".");
+    System.out.println("              One of \"instapaper\" or \"pocket\".");
     System.out.println();
     System.out.println("    <file>: Where to save the session data.");
     System.out.println("            Default is " + def_session_file.toString());

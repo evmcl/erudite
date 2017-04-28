@@ -53,7 +53,6 @@
       <zipfileset src="target/libs/default/logback-classic.jar" includes="ch/qos/**/*,org/slf4j/**/*"/>
       <zipfileset src="target/libs/default/logback-core.jar" includes="ch/qos/**/*"/>
       <zipfileset src="target/libs/default/mime-util.jar" includes="eu/medsea/**/*,mime.cache"/>
-      <zipfileset src="target/libs/default/scribe.jar" includes="org/scribe/**/*"/>
       <zipfileset src="target/libs/default/slf4j-api.jar" includes="org/slf4j/**/*"/>
       <zipfileset src="target/libs/default/jcl-over-slf4j.jar" includes="org/apache/commons/**/*"/>
     </jar>

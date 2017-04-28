@@ -28,7 +28,6 @@ import com.evanmclean.erudite.instapaper.Instapaper;
 import com.evanmclean.erudite.logback.ConsoleLogging;
 import com.evanmclean.erudite.logback.Logback;
 import com.evanmclean.erudite.pocket.Pocket;
-import com.evanmclean.erudite.readability.Readability;
 import com.evanmclean.erudite.sessions.Session;
 import com.evanmclean.erudite.sessions.SessionIO;
 import com.evanmclean.erudite.sessions.SourceType;
@@ -146,10 +145,6 @@ public class Main
         session = initInstapaper();
         break;
 
-      case READABILITY:
-        session = initReadability();
-        break;
-
       case POCKET:
         session = initPocket();
         break;
@@ -246,52 +241,6 @@ public class Main
     console.readLine("Enter to continue: ");
 
     return authoriser.getSession();
-  }
-
-  private static Session initReadability()
-  {
-    final Logger log = LoggerFactory.getLogger(Main.class);
-    log.info("Open the URL: {}", Readability.API_KEY_URL);
-    log.info("and create an API key. Enter the key and secret here.");
-
-    final Console console = System.console();
-    final String key = Str.trimToNull(console.readLine("Key: "));
-    if ( key == null )
-    {
-      log.error("No key specified.");
-      return null;
-    }
-
-    final String secret = Str.trimToNull(console.readLine("Secret: "));
-    if ( secret == null )
-    {
-      log.error("No secret specified.");
-      return null;
-    }
-
-    final Readability.Authoriser authoriser = Readability.getAuthoriser(key,
-      secret);
-    final String url = authoriser.getUrl();
-    try
-    {
-      Desktop.getDesktop().browse(new URI(url));
-      log.info("Opening {} in browser.", url);
-    }
-    catch ( Exception ex )
-    {
-      log.info("Open the URL: {}", url);
-    }
-    log.info("Click \"Allow\" and enter the verifier key here.");
-
-    final String verifier_key = Str
-        .trimToNull(console.readLine("Verifier Key: "));
-    if ( verifier_key == null )
-    {
-      log.error("No verifier key specified.");
-      return null;
-    }
-
-    return authoriser.getSession(verifier_key);
   }
 
   private static int list( final File session_file, final File config_file )
