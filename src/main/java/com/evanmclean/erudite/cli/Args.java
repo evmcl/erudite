@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.util.Arrays;
 
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.GnuParser;
+import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
@@ -26,8 +26,9 @@ import com.google.common.io.Resources;
 /**
  * Parses the command line arguments.
  *
- * @author Evan M<sup>c</sup>Lean, <a href="http://evanmclean.com/"
- *         target="_blank">M<sup>c</sup>Lean Computer Services</a>
+ * @author Evan M<sup>c</sup>Lean,
+ *         <a href="http://evanmclean.com/" target="_blank">M<sup>c</sup>Lean
+ *         Computer Services</a>
  */
 public class Args
 {
@@ -61,8 +62,8 @@ public class Args
    */
   public static ByteSource getInternalTemplate()
   {
-    return Resources.asByteSource(Resources
-      .getResource("com/evanmclean/erudite/template.html"));
+    return Resources.asByteSource(
+      Resources.getResource("com/evanmclean/erudite/template.html"));
   }
 
   /**
@@ -74,8 +75,8 @@ public class Args
    */
   public static ByteSource getSampleConfig()
   {
-    return Resources.asByteSource(Resources
-      .getResource("com/evanmclean/erudite/sample_config.properties"));
+    return Resources.asByteSource(
+      Resources.getResource("com/evanmclean/erudite/sample_config.properties"));
   }
 
   /**
@@ -92,14 +93,14 @@ public class Args
 
     System.out.println();
 
-    System.out
-    .println("Initialise a session, you must do this before you can process anything.");
+    System.out.println(
+      "Initialise a session, you must do this before you can process anything.");
     System.out.println();
     System.out.println("usage: init <source> [<file>]");
     System.out.println();
     System.out.println("    <source>: Where you'll be pulling articles from.");
-    System.out
-    .println("              One of \"instapaper\", \"readability\", or \"pocket\".");
+    System.out.println(
+      "              One of \"instapaper\", \"readability\", or \"pocket\".");
     System.out.println();
     System.out.println("    <file>: Where to save the session data.");
     System.out.println("            Default is " + def_session_file.toString());
@@ -121,7 +122,7 @@ public class Args
     System.out.println();
     System.out.println("    <file>: Where to save the template file.");
     System.out
-    .println("            Default is " + def_template_file.toString());
+        .println("            Default is " + def_template_file.toString());
 
     System.out.println();
 
@@ -137,8 +138,8 @@ public class Args
     System.out.println("List articles to be processed from a session.");
     System.out.println();
 
-    new HelpFormatter().printHelp(
-      "list [-v | -q | -S] [-c <file>] [-s <file>]", assembleListOptions());
+    new HelpFormatter().printHelp("list [-v | -q | -S] [-c <file>] [-s <file>]",
+      assembleListOptions());
 
     System.out.println();
 
@@ -150,10 +151,10 @@ public class Args
 
     System.out.println();
     System.out.println("Default session file: " + def_session_file.toString());
-    System.out.println("Default configuration file: "
-        + def_config_file.toString());
-    System.out.println("Default template file (optional): "
-        + def_template_file.toString());
+    System.out
+        .println("Default configuration file: " + def_config_file.toString());
+    System.out.println(
+      "Default template file (optional): " + def_template_file.toString());
   }
 
   private static Options assembleListOptions()
@@ -229,10 +230,11 @@ public class Args
    *        Extension new file should have (must include the leading ".")
    * @return The new file.
    */
-  private static File relativeFile( final File file, final String new_extension )
+  private static File relativeFile( final File file,
+      final String new_extension )
   {
-    return Files.getCanonicalFile(new File(FileName.sansExtension(file)
-      + new_extension));
+    return Files.getCanonicalFile(
+      new File(FileName.sansExtension(file) + new_extension));
   }
 
   private static String[] tail( final String[] strs )
@@ -322,8 +324,8 @@ public class Args
 
         case TITLETEST:
         {
-          final CommandLine args = new GnuParser().parse(
-            assembleTitleTestOptions(), tail(cmdline));
+          final CommandLine args = new DefaultParser()
+              .parse(assembleTitleTestOptions(), tail(cmdline));
 
           if ( args.hasOption('c') )
             configFile = getCanonicalFile(args.getOptionValue('c'));
@@ -339,12 +341,12 @@ public class Args
           if ( Str.isEmpty(titleToTest) )
             throw new DisplayHelpException();
         }
-        break;
+          break;
 
         case PROCESS:
         {
-          final CommandLine args = new GnuParser().parse(
-            assembleProcessOptions(), tail(cmdline));
+          final CommandLine args = new DefaultParser()
+              .parse(assembleProcessOptions(), tail(cmdline));
 
           final boolean verbose = args.hasOption('v');
           final boolean quiet = args.hasOption('q');
@@ -393,12 +395,12 @@ public class Args
           if ( Arr.isNotEmpty(args.getArgs()) )
             throw new DisplayHelpException();
         }
-        break;
+          break;
 
         case LIST:
         {
-          final CommandLine args = new GnuParser().parse(assembleListOptions(),
-            tail(cmdline));
+          final CommandLine args = new DefaultParser()
+              .parse(assembleListOptions(), tail(cmdline));
 
           consoleLogging = args.hasOption('v') ? ConsoleLogging.VERBOSE
               : ConsoleLogging.NORMAL;
@@ -420,7 +422,7 @@ public class Args
           if ( Arr.isNotEmpty(args.getArgs()) )
             throw new DisplayHelpException();
         }
-        break;
+          break;
 
         default:
           throw new DisplayHelpException();

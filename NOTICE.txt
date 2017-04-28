@@ -20,10 +20,6 @@ Jackson JSON Processor
 http://wiki.fasterxml.com/JacksonHome
 Dual Apache 2.0 and LGPL 2.1 http://wiki.fasterxml.com/JacksonLicensing
 
-JLine2
-https://github.com/jline/jline2
-BSD License https://github.com/jline/jline2/blob/master/LICENSE.txt
-
 jsoup: Java HTML Parser
 http://jsoup.org/
 MIT License http://jsoup.org/license
@@ -35,10 +31,6 @@ Dual EPL v1.0 and LPGL 2.1 http://logback.qos.ch/license.html
 MIME Type Detection Utility
 https://sourceforge.net/projects/mime-util/
 Apache License 2.0 https://sourceforge.net/directory/license:apache2/
-
-Scribe: OAuth library
-https://github.com/fernandezpablo85/scribe-java
-MIT License https://github.com/fernandezpablo85/scribe-java/blob/master/LICENSE.txt
 
 Simple Logging Facade for Java (SLF4J)
 http://www.slf4j.org/

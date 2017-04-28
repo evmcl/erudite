@@ -4,6 +4,9 @@ import java.io.File;
 
 import org.slf4j.LoggerFactory;
 
+import com.evanmclean.erudite.ProcessorThread;
+import com.evanmclean.evlib.lang.Str;
+
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
@@ -12,29 +15,29 @@ import ch.qos.logback.classic.filter.ThresholdFilter;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.ConsoleAppender;
+import ch.qos.logback.core.filter.Filter;
 import ch.qos.logback.core.rolling.FixedWindowRollingPolicy;
 import ch.qos.logback.core.rolling.RollingFileAppender;
 import ch.qos.logback.core.rolling.TriggeringPolicy;
 import ch.qos.logback.core.rolling.TriggeringPolicyBase;
+import ch.qos.logback.core.spi.FilterReply;
 import ch.qos.logback.core.util.StatusPrinter;
-
-import com.evanmclean.erudite.ProcessorThread;
-import com.evanmclean.evlib.lang.Str;
 
 /**
  * <p>
  * Configures the Logback logging system for our application.
  * </p>
- * 
+ *
  * <p>
  * We do what is hopefully a somewhat clever trick were we buffer the log
  * messages destine to the console by the {@link ProcessorThread}s and flush
  * them as each article has been processed. Thus you wont get interleaved
  * messages on the console from the processing of different articles.
  * </p>
- * 
- * @author Evan M<sup>c</sup>Lean, <a href="http://evanmclean.com/"
- *         target="_blank">M<sup>c</sup>Lean Computer Services</a>
+ *
+ * @author Evan M<sup>c</sup>Lean,
+ *         <a href="http://evanmclean.com/" target="_blank">M<sup>c</sup>Lean
+ *         Computer Services</a>
  */
 public class Logback
 {
@@ -43,7 +46,7 @@ public class Logback
 
   /**
    * Configure Logback.
-   * 
+   *
    * @param log_file
    *        The log file to rollover and then log to.
    * @param clogging
@@ -96,7 +99,8 @@ public class Logback
         {
           final PatternLayoutEncoder enc = new PatternLayoutEncoder();
           enc.setContext(context);
-          enc.setPattern("%-8date{H:mm:ss} [%thread] %-5level %logger{15} %message%n");
+          enc.setPattern(
+            "%-8date{H:mm:ss} [%thread] %-5level %logger{15} %message%n");
           enc.start();
           logapp.setEncoder(enc);
         }
@@ -117,8 +121,8 @@ public class Logback
           {
             final PatternLayoutEncoder enc = new PatternLayoutEncoder();
             enc.setContext(context);
-            enc.setPattern(verbose ? "%-8date{H:mm:ss} %message%n"
-                : "%message%n");
+            enc.setPattern(
+              verbose ? "%-8date{H:mm:ss} %message%n" : "%message%n");
             enc.start();
             parentapp.setEncoder(enc);
           }
@@ -130,10 +134,24 @@ public class Logback
           {
             final ThresholdFilter filter = new ThresholdFilter();
             filter.setContext(context);
-            filter.setLevel(verbose ? Level.DEBUG.toString() : Level.INFO
-                .toString());
+            filter.setLevel(
+              verbose ? Level.DEBUG.toString() : Level.INFO.toString());
             filter.start();
             conapp.addFilter(filter);
+            conapp.addFilter(new Filter<ILoggingEvent>() {
+              @Override
+              public FilterReply decide( final ILoggingEvent event )
+              {
+                if ( event.getLevel().isGreaterOrEqual(Level.WARN) )
+                  return FilterReply.NEUTRAL;
+
+                if ( event.getLoggerName()
+                    .startsWith("org.apache.commons.beanutils") )
+                  return FilterReply.DENY;
+
+                return FilterReply.NEUTRAL;
+              }
+            });
           }
           conapp.start();
         }
@@ -200,7 +218,7 @@ public class Logback
 
   /**
    * True if Logback has been successfully configured.
-   * 
+   *
    * @return True if Logback has been successfully configured.
    */
   public static boolean isConfigured()

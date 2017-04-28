@@ -2,8 +2,11 @@ package com.evanmclean.erudite.config;
 
 import java.io.File;
 
-import org.apache.commons.configuration.ConfigurationException;
-import org.apache.commons.configuration.PropertiesConfiguration;
+import org.apache.commons.configuration2.PropertiesConfiguration;
+import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder;
+import org.apache.commons.configuration2.builder.fluent.Parameters;
+import org.apache.commons.configuration2.convert.DisabledListDelimiterHandler;
+import org.apache.commons.configuration2.ex.ConfigurationException;
 
 import com.evanmclean.erudite.cli.Args;
 import com.evanmclean.evlib.lang.Arr;
@@ -13,33 +16,33 @@ import com.google.common.collect.ImmutableList;
 
 /**
  * Reads the configuration from a file.
- * 
- * @author Evan M<sup>c</sup>Lean, <a href="http://evanmclean.com/"
- *         target="_blank">M<sup>c</sup>Lean Computer Services</a>
+ *
+ * @author Evan M<sup>c</sup>Lean,
+ *         <a href="http://evanmclean.com/" target="_blank">M<sup>c</sup>Lean
+ *         Computer Services</a>
  */
 public final class ConfigReader
 {
   /**
    * Read the configuration from a file. Uses a {@link PropertiesConfiguration}
    * under the hood.
-   * 
+   *
    * @param file
    * @return A {@link Config}.
    * @throws ConfigurationException
    */
   public static Config read( final File file ) throws ConfigurationException
   {
-    final PropertiesConfiguration props = new PropertiesConfiguration() {
-      {
-        this.setIncludesAllowed(true);
-        this.setDelimiterParsingDisabled(true);
-        this.setBasePath(Args.defUserDataFolder().toString());
-        this.setThrowExceptionOnMissing(false);
-        this.setEncoding("UTF-8");
-      }
-    };
-
-    props.load(file);
+    final PropertiesConfiguration props = new FileBasedConfigurationBuilder<PropertiesConfiguration>(
+        PropertiesConfiguration.class)
+            .configure(new Parameters().properties() //
+                .setIncludesAllowed(true) //
+                .setListDelimiterHandler(DisabledListDelimiterHandler.INSTANCE) //
+                .setBasePath(Args.defUserDataFolder().toString()) //
+                .setThrowExceptionOnMissing(false) //
+                .setEncoding("UTF-8") //
+                .setFile(file) //
+            ).getConfiguration();
 
     // Get the titles for title munging.
     final TitleMunger titleMunger;

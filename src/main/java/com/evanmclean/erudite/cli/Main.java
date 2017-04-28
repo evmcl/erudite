@@ -1,6 +1,7 @@
 package com.evanmclean.erudite.cli;
 
 import java.awt.Desktop;
+import java.io.Console;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -8,7 +9,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import org.apache.commons.configuration.ConfigurationException;
+import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,10 +25,8 @@ import com.evanmclean.erudite.config.Config;
 import com.evanmclean.erudite.config.ConfigReader;
 import com.evanmclean.erudite.config.ProcessorsFactory;
 import com.evanmclean.erudite.instapaper.Instapaper;
-import com.evanmclean.erudite.jline.ConsoleReader;
 import com.evanmclean.erudite.logback.ConsoleLogging;
 import com.evanmclean.erudite.logback.Logback;
-import com.evanmclean.erudite.misc.Utils;
 import com.evanmclean.erudite.pocket.Pocket;
 import com.evanmclean.erudite.readability.Readability;
 import com.evanmclean.erudite.sessions.Session;
@@ -41,8 +40,9 @@ import com.google.common.io.Files;
 /**
  * Main entry point for the command line application.
  *
- * @author Evan M<sup>c</sup>Lean, <a href="http://evanmclean.com/"
- *         target="_blank">M<sup>c</sup>Lean Computer Services</a>
+ * @author Evan M<sup>c</sup>Lean,
+ *         <a href="http://evanmclean.com/" target="_blank">M<sup>c</sup>Lean
+ *         Computer Services</a>
  */
 public class Main
 {
@@ -105,8 +105,8 @@ public class Main
         return titleTest(args.getTitleToTest(), args.getConfigFile());
     }
 
-    throw new IllegalStateException("Don't know what to do for the action: "
-        + args.getAction());
+    throw new IllegalStateException(
+        "Don't know what to do for the action: " + args.getAction());
   }
 
   private static int config( final File config_file ) throws IOException
@@ -114,19 +114,19 @@ public class Main
     if ( config_file.exists() )
     {
       System.out.println("The configuration file already exists.");
-      System.out.println("Delete or rename " + config_file.toString()
-        + " first.");
+      System.out
+          .println("Delete or rename " + config_file.toString() + " first.");
       return 1;
     }
 
     Args.getSampleConfig().copyTo(Files.asByteSink(config_file));
-    System.out.println("Generated configuration file: "
-        + config_file.toString());
+    System.out
+        .println("Generated configuration file: " + config_file.toString());
     return 0;
   }
 
   private static int init( final SourceType source, final File session_file )
-      throws Exception
+    throws Exception
   {
     final Logger log = LoggerFactory.getLogger(Main.class);
 
@@ -156,7 +156,7 @@ public class Main
 
       default:
         throw new IllegalStateException(
-          "Don't know what to do for the source: " + source);
+            "Don't know what to do for the source: " + source);
     }
 
     if ( session == null )
@@ -175,165 +175,127 @@ public class Main
   private static Session initInstapaper() throws IOException
   {
     final Logger log = LoggerFactory.getLogger(Main.class);
-    final ConsoleReader console = new ConsoleReader();
-    try
+    log.info("Need your credentials for Instapaper.");
+    log.info(
+      "(Note: Your password is not stored. Only session cookies are stored.)");
+
+    final Console console = System.console();
+    final String email = Str.trimToNull(console.readLine("Email: "));
+    if ( email == null )
     {
-      final String email;
-      final String pass;
-      try
-      {
-        log.info("Need your credentials for Instapaper.");
-        log.info("(Note: Your password is not stored. Only session cookies are stored.)");
-
-        email = Str.trimToNull(console.readLine("Email: "));
-        if ( email == null )
-        {
-          console.getTerminal().setEchoEnabled(true);
-          log.error("No email address specified.");
-          return null;
-        }
-
-        pass = console.readLine("Pass: ", Utils.IS_WINDOWS ? '*' : '\u0000');
-        console.println();
-      }
-      finally
-      {
-        console.getTerminal().setEchoEnabled(true);
-      }
-      if ( Str.isEmpty(pass) )
-      {
-        log.error("No password specified.");
-        return null;
-      }
-
-      return Instapaper.login(email, pass);
+      log.error("No email address specified.");
+      return null;
     }
-    finally
+
+    final String pass = String.valueOf(console.readPassword("Pass: "));
+    if ( Str.isEmpty(pass) )
     {
-      console.getTerminal().setEchoEnabled(true);
+      log.error("No password specified.");
+      return null;
     }
+
+    return Instapaper.login(email, pass);
   }
 
   private static Session initPocket() throws Exception
   {
     final Logger log = LoggerFactory.getLogger(Main.class);
-    final ConsoleReader console = new ConsoleReader();
+    log.info("Need your credentials for Pocket.");
+    log.info(
+      "(Note: Your password is not stored. Only session cookies are stored.)");
+
+    final Console console = System.console();
+    final String user = Str.trimToNull(console.readLine("Username: "));
+    if ( user == null )
+    {
+      log.error("No username address specified.");
+      return null;
+    }
+
+    final String pass = String.valueOf(console.readPassword("Pass: "));
+    if ( Str.isEmpty(pass) )
+    {
+      log.error("No password specified.");
+      return null;
+    }
+
+    log.info("Open the URL: {}", Pocket.API_KEY_URL);
+    log.info("and create an API key. Enter the consumer key here.");
+
+    final String key = Str.trimToNull(console.readLine("Key: "));
+    if ( key == null )
+    {
+      log.error("No key specified.");
+      return null;
+    }
+
+    final Pocket.Authoriser authoriser = Pocket.getAuthoriser(user, pass, key);
+    final String url = authoriser.getUrl();
     try
     {
-      log.info("Need your credentials for Pocket.");
-      log.info("(Note: Your password is not stored. Only session cookies are stored.)");
-
-      final String user = Str.trimToNull(console.readLine("Username: "));
-      if ( user == null )
-      {
-        console.getTerminal().setEchoEnabled(true);
-        log.error("No username address specified.");
-        return null;
-      }
-
-      final String pass = console.readLine("Pass: ", Utils.IS_WINDOWS ? '*'
-          : '\u0000');
-      console.println();
-      console.getTerminal().setEchoEnabled(true);
-      if ( Str.isEmpty(pass) )
-      {
-        log.error("No password specified.");
-        return null;
-      }
-
-      log.info("Open the URL: {}", Pocket.API_KEY_URL);
-      log.info("and create an API key. Enter the consumer key here.");
-
-      final String key = Str.trimToNull(console.readLine("Key: "));
-      if ( key == null )
-      {
-        console.getTerminal().setEchoEnabled(true);
-        log.error("No key specified.");
-        return null;
-      }
-
-      final Pocket.Authoriser authoriser = Pocket
-          .getAuthoriser(user, pass, key);
-      final String url = authoriser.getUrl();
-      try
-      {
-        Desktop.getDesktop().browse(new URI(url));
-        log.info("Opening {} in browser.", url);
-      }
-      catch ( Exception ex )
-      {
-        log.info("Open the URL: {}", url);
-      }
-      log.info("Click \"Authorize\". Once you are back at the main pocket window, press Enter to continue.");
-
-      console.readLine("Enter to continue: ");
-
-      return authoriser.getSession();
+      Desktop.getDesktop().browse(new URI(url));
+      log.info("Opening {} in browser.", url);
     }
-    finally
+    catch ( Exception ex )
     {
-      console.getTerminal().setEchoEnabled(true);
+      log.info("Open the URL: {}", url);
     }
+    log.info(
+      "Click \"Authorize\". Once you are back at the main pocket window, press Enter to continue.");
+
+    console.readLine("Enter to continue: ");
+
+    return authoriser.getSession();
   }
 
-  private static Session initReadability() throws Exception
+  private static Session initReadability()
   {
     final Logger log = LoggerFactory.getLogger(Main.class);
-    final ConsoleReader console = new ConsoleReader();
+    log.info("Open the URL: {}", Readability.API_KEY_URL);
+    log.info("and create an API key. Enter the key and secret here.");
+
+    final Console console = System.console();
+    final String key = Str.trimToNull(console.readLine("Key: "));
+    if ( key == null )
+    {
+      log.error("No key specified.");
+      return null;
+    }
+
+    final String secret = Str.trimToNull(console.readLine("Secret: "));
+    if ( secret == null )
+    {
+      log.error("No secret specified.");
+      return null;
+    }
+
+    final Readability.Authoriser authoriser = Readability.getAuthoriser(key,
+      secret);
+    final String url = authoriser.getUrl();
     try
     {
-      log.info("Open the URL: {}", Readability.API_KEY_URL);
-      log.info("and create an API key. Enter the key and secret here.");
-
-      final String key = Str.trimToNull(console.readLine("Key: "));
-      if ( key == null )
-      {
-        console.getTerminal().setEchoEnabled(true);
-        log.error("No key specified.");
-        return null;
-      }
-
-      final String secret = Str.trimToNull(console.readLine("Secret: "));
-      if ( secret == null )
-      {
-        console.getTerminal().setEchoEnabled(true);
-        log.error("No secret specified.");
-        return null;
-      }
-
-      final Readability.Authoriser authoriser = Readability.getAuthoriser(key,
-        secret);
-      final String url = authoriser.getUrl();
-      try
-      {
-        Desktop.getDesktop().browse(new URI(url));
-        log.info("Opening {} in browser.", url);
-      }
-      catch ( Exception ex )
-      {
-        log.info("Open the URL: {}", url);
-      }
-      log.info("Click \"Allow\" and enter the verifier key here.");
-
-      final String verifier_key = Str.trimToNull(console
-        .readLine("Verifier Key: "));
-      if ( verifier_key == null )
-      {
-        console.getTerminal().setEchoEnabled(true);
-        log.error("No verifier key specified.");
-        return null;
-      }
-
-      return authoriser.getSession(verifier_key);
+      Desktop.getDesktop().browse(new URI(url));
+      log.info("Opening {} in browser.", url);
     }
-    finally
+    catch ( Exception ex )
     {
-      console.getTerminal().setEchoEnabled(true);
+      log.info("Open the URL: {}", url);
     }
+    log.info("Click \"Allow\" and enter the verifier key here.");
+
+    final String verifier_key = Str
+        .trimToNull(console.readLine("Verifier Key: "));
+    if ( verifier_key == null )
+    {
+      log.error("No verifier key specified.");
+      return null;
+    }
+
+    return authoriser.getSession(verifier_key);
   }
 
   private static int list( final File session_file, final File config_file )
-      throws IOException,
+    throws IOException,
       ClassNotFoundException,
       ConfigurationException
   {
@@ -365,9 +327,9 @@ public class Main
 
   private static int process( final File session_file, final File config_file,
       final TemplateFactory tf, final boolean quiet )
-          throws IOException,
-          ClassNotFoundException,
-          ConfigurationException
+    throws IOException,
+      ClassNotFoundException,
+      ConfigurationException
   {
     final Logger log = LoggerFactory.getLogger(Main.class);
     final Session session = SessionIO.read(session_file);
@@ -410,12 +372,12 @@ public class Main
           final ProcessorThread[] thrds = new ProcessorThread[Math.min(
             numarticles,
             Math.max(1, Math.min(config.getInt("worker.threads", 1), 20)))];
-          final ImageHandlerFactory ihf = ImageHandlerFactory.create(
-            thrds.length, config);
+          final ImageHandlerFactory ihf = ImageHandlerFactory
+              .create(thrds.length, config);
 
           for ( int xi = 0; xi < thrds.length; ++xi )
             thrds[xi] = new ProcessorThread(articles, erudite, source, ihf,
-              processors, new File(tmp_folder, "worker" + xi));
+                processors, new File(tmp_folder, "worker" + xi));
 
           for ( final ProcessorThread thrd : thrds )
             thrd.start();
@@ -449,8 +411,8 @@ public class Main
     if ( template_file.exists() )
     {
       System.out.println("The template file already exists.");
-      System.out.println("Delete or rename " + template_file.toString()
-        + " first.");
+      System.out
+          .println("Delete or rename " + template_file.toString() + " first.");
       return 1;
     }
 
@@ -460,7 +422,8 @@ public class Main
   }
 
   private static int titleTest( final String title_to_test,
-      final File config_file ) throws ConfigurationException
+      final File config_file )
+    throws ConfigurationException
   {
     Logback.devnull();
     final String new_title = ConfigReader.read(config_file).getTitleMunger()

@@ -11,16 +11,15 @@
 	<classpathentry kind="lib" path="target/libs/default/guava.jar"/>
 	<classpathentry kind="lib" path="src/main/resources"/>
 	<classpathentry kind="lib" path="src/main/libs/default/evlib.jar"/>
-	<classpathentry kind="lib" path="target/libs/default/jline.jar"/>
 	<classpathentry kind="lib" path="target/libs/default/jsoup.jar"/>
 	<classpathentry kind="lib" path="target/libs/default/mime-util.jar"/>
-	<classpathentry kind="lib" path="target/libs/default/commons-configuration.jar"/>
-	<classpathentry kind="lib" path="target/libs/default/commons-lang.jar"/>
 	<classpathentry kind="lib" path="target/libs/default/jcl-over-slf4j.jar"/>
 	<classpathentry kind="lib" path="target/libs/default/jackson-core.jar"/>
-	<classpathentry kind="lib" path="target/libs/default/scribe.jar"/>
 	<classpathentry kind="lib" path="target/libs/default/commons-codec.jar"/>
 	<classpathentry kind="lib" path="target/libs/default/jackson-annotations.jar"/>
 	<classpathentry kind="lib" path="target/libs/default/jackson-databind.jar"/>
+	<classpathentry kind="lib" path="target/libs/default/scribe.jar"/>
+	<classpathentry kind="lib" path="target/libs/default/commons-configuration2.jar"/>
+	<classpathentry kind="lib" path="target/libs/default/commons-lang3.jar"/>
 	<classpathentry kind="output" path="target/eclipse/classes"/>
 </classpath>

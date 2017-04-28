@@ -40,15 +40,15 @@
       <fileset dir="target/classes"/>
       <fileset dir="src/main/resources"/>
       <zipfileset src="src/main/libs/default/evlib.jar" includes="com/evanmclean/evlib/**/*"/>
+      <zipfileset src="target/libs/default/commons-beanutils.jar" includes="org/apache/commons/**/*"/>
       <zipfileset src="target/libs/default/commons-cli.jar" includes="org/apache/commons/**/*"/>
       <zipfileset src="target/libs/default/commons-codec.jar" includes="org/apache/commons/**/*"/>
-      <zipfileset src="target/libs/default/commons-configuration.jar" includes="org/apache/commons/**/*"/>
-      <zipfileset src="target/libs/default/commons-lang.jar" includes="org/apache/commons/**/*"/>
+      <zipfileset src="target/libs/default/commons-configuration2.jar" includes="org/apache/commons/**/*"/>
+      <zipfileset src="target/libs/default/commons-lang3.jar" includes="org/apache/commons/**/*"/>
       <zipfileset src="target/libs/default/guava.jar" includes="com/google/**/*"/>
       <zipfileset src="target/libs/default/jackson-annotations.jar" includes="com/fasterxml/jackson/annotation/**/*"/>
       <zipfileset src="target/libs/default/jackson-core.jar" includes="com/fasterxml/jackson/core/**/*"/>
       <zipfileset src="target/libs/default/jackson-databind.jar" includes="com/fasterxml/jackson/databind/**/*"/>
-      <zipfileset src="target/libs/default/jline.jar" includes="jline/**/*,org/fusesource/**/*,META-INF/native/**/*"/>
       <zipfileset src="target/libs/default/jsoup.jar" includes="org/jsoup/**/*"/>
       <zipfileset src="target/libs/default/logback-classic.jar" includes="ch/qos/**/*,org/slf4j/**/*"/>
       <zipfileset src="target/libs/default/logback-core.jar" includes="ch/qos/**/*"/>
