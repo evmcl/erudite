@@ -5,7 +5,7 @@ an appropriate format such as EPUB or MOBI, and add them to your Calibre
 ebook library. It is a command-line driven tool.
 
   Home Page: http://evanmclean.com/software/erudite/
-  Downloads: https://code.google.com/p/evmcl/downloads/list
+  Downloads: https://github.com/evmcl/erudite/releases
   GitHub:    https://github.com/evmcl/erudite
 
 See doc/index.html for documentation.

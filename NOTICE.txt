@@ -13,7 +13,7 @@ https://github.com/evmcl/evlibjava
 BSD License https://github.com/evmcl/evlibjava/blob/master/license.txt
 
 Guava Libraries
-https://code.google.com/p/guava-libraries/
+https://github.com/google/guava
 Apache License 2.0 http://www.apache.org/licenses/LICENSE-2.0
 
 Jackson JSON Processor

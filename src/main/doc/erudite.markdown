@@ -23,7 +23,7 @@ This documentation is also available in
 <#if for_jekyll != "true">
 [Home Page](http://evanmclean.com/software/erudite/) &bull;
 </#if>
-[Downloads](https://code.google.com/p/evmcl/downloads/list) &bull;
+[Downloads](https://github.com/evmcl/erudite/releases) &bull;
 [GitHub](https://github.com/evmcl/erudite)
 
 Erudite is distributed under the [Apache License

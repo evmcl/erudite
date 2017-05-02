@@ -8,7 +8,7 @@ such as EPUB or MOBI, and add them to your
 driven tool.
 
 [Home Page](http://evanmclean.com/software/erudite/) &bull;
-[Downloads](https://code.google.com/p/evmcl/downloads/list) &bull;
+[Downloads](https://github.com/evmcl/erudite/releases) &bull;
 [GitHub](https://github.com/evmcl/erudite)
 
 Erudite is distributed under the [Apache License
