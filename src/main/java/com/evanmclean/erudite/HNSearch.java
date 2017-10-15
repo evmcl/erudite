@@ -25,8 +25,9 @@ import com.google.common.collect.ImmutableList;
  * Performs an API lookup of hn.algolia.com to see if the article has featured
  * on Hacker News and if so, returns the discussion thread URL.
  *
- * @author Evan M<sup>c</sup>Lean, <a href="http://evanmclean.com/"
- *         target="_blank">M<sup>c</sup>Lean Computer Services</a>
+ * @author Evan M<sup>c</sup>Lean,
+ *         <a href="http://evanmclean.com/" target="_blank">M<sup>c</sup>Lean
+ *         Computer Services</a>
  */
 public final class HNSearch
 {
@@ -40,25 +41,31 @@ public final class HNSearch
       this.hits = hits;
     }
 
+    @Override
+    public String toString()
+    {
+      return "HNHits [hits=" + hits + "]";
+    }
+
   }
 
   private static class HNItem implements Comparable<HNItem>
   {
     final String objectID;
     final String url;
-    final int create_at_i;
+    final int created_at_i;
     final int num_comments;
 
     @SuppressWarnings( "unused" )
     public HNItem( @JsonProperty( "objectID" ) final String objectID,
         @JsonProperty( "url" ) final String url //
-        , @JsonProperty( "create_at_i" ) final int create_at_i //
+        , @JsonProperty( "created_at_i" ) final int created_at_i //
         , @JsonProperty( "num_comments" ) final int num_comments //
-        )
+    )
     {
       this.objectID = objectID;
       this.url = url;
-      this.create_at_i = create_at_i;
+      this.created_at_i = created_at_i;
       this.num_comments = num_comments;
     }
 
@@ -68,7 +75,7 @@ public final class HNSearch
       int ret = rhs.num_comments - num_comments;
       if ( ret == 0 )
       {
-        ret = create_at_i - rhs.create_at_i;
+        ret = created_at_i - rhs.created_at_i;
         if ( ret == 0 )
           ret = Str.ifNull(objectID).compareTo(Str.ifNull(rhs.objectID));
       }
@@ -85,7 +92,7 @@ public final class HNSearch
       if ( getClass() != obj.getClass() )
         return false;
       HNItem other = (HNItem) obj;
-      if ( create_at_i != other.create_at_i )
+      if ( created_at_i != other.created_at_i )
         return false;
       if ( num_comments != other.num_comments )
         return false;
@@ -111,11 +118,17 @@ public final class HNSearch
     {
       final int prime = 31;
       int result = 1;
-      result = prime * result + create_at_i;
+      result = prime * result + created_at_i;
       result = prime * result + num_comments;
       result = prime * result + ((objectID == null) ? 0 : objectID.hashCode());
       result = prime * result + ((url == null) ? 0 : url.hashCode());
       return result;
+    }
+
+    @Override
+    public String toString()
+    {
+      return "HNItem [objectID=" + objectID + ", url=" + url + "]";
     }
   }
 
@@ -197,8 +210,8 @@ public final class HNSearch
     }
     catch ( Exception ex )
     {
-      LoggerFactory.getLogger(HNSearch.class).trace(
-        "Error while HNSearch for " + article.getOriginalUrl(), ex);
+      LoggerFactory.getLogger(HNSearch.class)
+          .trace("Error while HNSearch for " + article.getOriginalUrl(), ex);
       return ImmutableList.of();
     }
   }
@@ -219,7 +232,8 @@ public final class HNSearch
                 source.sourceUrl);
               if ( results.isEmpty() && Str.isNotEmpty(source.title) )
               {
-                log.trace("Could not find match based on URL, so searching on title instead.");
+                log.trace(
+                  "Could not find match based on URL, so searching on title instead.");
                 results = search(source.title, source.sourceUrl);
               }
               if ( results.isEmpty() )
@@ -230,7 +244,8 @@ public final class HNSearch
             catch ( Exception ex )
             {
               log.trace("Exception while looking up hn.algolia.com for: "
-                  + source.sourceUrl, ex);
+                  + source.sourceUrl,
+                ex);
               return EMPTY;
             }
           }
@@ -269,8 +284,10 @@ public final class HNSearch
   }
 
   private static ImmutableList<String> parse( final String json,
-    final String source_url ) throws JsonParseException, IOException
-    {
+      final String source_url )
+    throws JsonParseException,
+      IOException
+  {
     final Logger log = LoggerFactory.getLogger(HNSearch.class);
 
     final ObjectMapper om = new ObjectMapper();
@@ -295,7 +312,7 @@ public final class HNSearch
     if ( items.isEmpty() )
       return EMPTY;
     return ImmutableList.copyOf(items.values());
-    }
+  }
 
   private HNSearch()
   {
