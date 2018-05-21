@@ -11,10 +11,10 @@
     <dependency org="org.apache.commons" name="commons-configuration2" rev="2.1.1" transitive="false" conf="default"/>
     <dependency org="org.apache.commons" name="commons-lang3" rev="3.5" transitive="false" conf="default"/>
     <dependency org="com.google.code.findbugs" name="findbugs" rev="3.0.1" transitive="false" conf="default"/>
-    <dependency org="com.google.guava" name="guava" rev="23.2-jre" transitive="false" conf="default"/>
-    <dependency org="com.fasterxml.jackson.core" name="jackson-annotations" rev="2.9.0" transitive="false" conf="default"/>
-    <dependency org="com.fasterxml.jackson.core" name="jackson-core" rev="2.9.0" transitive="false" conf="default"/>
-    <dependency org="com.fasterxml.jackson.core" name="jackson-databind" rev="2.9.0" transitive="false" conf="default"/>
+    <dependency org="com.google.guava" name="guava" rev="25.0-jre" transitive="false" conf="default"/>
+    <dependency org="com.fasterxml.jackson.core" name="jackson-annotations" rev="2.9.5" transitive="false" conf="default"/>
+    <dependency org="com.fasterxml.jackson.core" name="jackson-core" rev="2.9.5" transitive="false" conf="default"/>
+    <dependency org="com.fasterxml.jackson.core" name="jackson-databind" rev="2.9.5" transitive="false" conf="default"/>
     <dependency org="org.jsoup" name="jsoup" rev="1.10.3" transitive="false" conf="default"/>
     <dependency org="junit" name="junit" rev="4.12" transitive="false" conf="default"/>
     <dependency org="ch.qos.logback" name="logback-classic" rev="1.2.3" transitive="false" conf="default"/>
