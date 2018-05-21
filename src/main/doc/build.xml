@@ -40,7 +40,7 @@
       <param name="image_prefix" value=""/>
       <param name="ebook_prefix" value=""/>
       <param name="for_website" value="true"/>
-      <param name="for_jekyll" value="false"/>
+      <param name="for_hugo" value="false"/>
     </antcall>
   </target>
 
@@ -101,7 +101,7 @@
   </target>
 
   <target name="install_markdown" depends="ebooks">
-    <!-- Called by off-site project to integrate jekyll output into evanmclean.com.
+    <!-- Called by off-site project to integrate hugo output into evanmclean.com.
           Must have the following variables defined:
             markdown_file - Where to generate the markdown file.
             images_dir - Where to copy images.
@@ -118,7 +118,7 @@
     <antcall target="markdown_func">
       <param name="outfile" location="${markdown_file}"/>
       <param name="for_website" value="true"/>
-      <param name="for_jekyll" value="true"/>
+      <param name="for_hugo" value="true"/>
     </antcall>
   </target>
 
@@ -129,7 +129,7 @@
       <param name="image_prefix" value=""/>
       <param name="ebook_prefix" value=""/>
       <param name="for_website" value="false"/>
-      <param name="for_jekyll" value="false"/>
+      <param name="for_hugo" value="false"/>
     </antcall>
   </target>
 
@@ -179,13 +179,13 @@
         <property name="image_prefix" value=""/>
         <property name="ebook_prefix" value=""/>
         <property name="for_website" value="false"/>
-        <property name="for_jekyll" value="false"/>
+        <property name="for_hugo" value="false"/>
         <fmpp
           sourceFile="${build}/working/erudite.ftl"
           outputFile="${outfile}"
           sourceEncoding="UTF-8"
           outputEncoding="UTF-8"
-          data="antProperties(image_prefix, ebook_prefix, for_website, for_jekyll)"
+          data="antProperties(image_prefix, ebook_prefix, for_website, for_hugo)"
         />
       </then>
     </if>

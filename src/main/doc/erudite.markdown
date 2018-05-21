@@ -1,6 +1,5 @@
-<#if for_jekyll == "true">
+<#if for_hugo == "true">
 ---
-layout: default
 title: Erudite
 ---
 </#if>
@@ -20,7 +19,7 @@ This documentation is also available in
 [MOBI](${ebook_prefix}erudite.mobi) ebook formats.
 </#if>
 
-<#if for_jekyll != "true">
+<#if for_hugo != "true">
 [Home Page](http://evanmclean.com/software/erudite/) &bull;
 </#if>
 [Downloads](https://github.com/evmcl/erudite/releases) &bull;
@@ -42,7 +41,7 @@ of configuration properties to produce the appropriately formatted ebook
 files and (optionally) add them to your
 [Calibre](http://calibre-ebook.com/) ebook library.
 
-![Erudite Components](${image_prefix}erudite_parts.png)<#if for_jekyll != "true">\ </#if>
+![Erudite Components](${image_prefix}erudite_parts.png)<#if for_hugo != "true">\ </#if>
 
 ## Session File
 
