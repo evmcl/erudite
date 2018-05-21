@@ -29,8 +29,9 @@ import com.google.common.collect.ImmutableSortedMap;
 /**
  * Represents a login to the Instapaper service.
  *
- * @author Evan M<sup>c</sup>Lean, <a href="http://evanmclean.com/"
- *         target="_blank">M<sup>c</sup>Lean Computer Services</a>
+ * @author Evan M<sup>c</sup>Lean,
+ *         <a href="http://evanmclean.com/" target="_blank">M<sup>c</sup>Lean
+ *         Computer Services</a>
  */
 public class Instapaper
 {
@@ -46,9 +47,9 @@ public class Instapaper
     private Element _text;
 
     Article( final String title, final String original_url,
-      final String summary, final String text_url, final String archive_url,
-      final String move_url, final String delete_url )
-      {
+        final String summary, final String text_url, final String archive_url,
+        final String move_url, final String delete_url )
+    {
       this.title = title;
       this.originalUrl = original_url;
       this.summary = summary;
@@ -56,14 +57,14 @@ public class Instapaper
       this.archiveUrl = archive_url;
       this.moveUrl = move_url;
       this.deleteUrl = delete_url;
-      }
+    }
 
     @SuppressWarnings( "synthetic-access" )
     @Override
     public void archive() throws IOException
     {
-      LoggerFactory.getLogger(getClass()).trace(
-        "Archiving article on Instapaper: {}", title);
+      LoggerFactory.getLogger(getClass())
+          .trace("Archiving article on Instapaper: {}", title);
       connect(archiveUrl).execute();
     }
 
@@ -106,8 +107,8 @@ public class Instapaper
     @Override
     public void remove() throws IOException
     {
-      LoggerFactory.getLogger(getClass()).trace(
-        "Removing article on Instapaper: {}", title);
+      LoggerFactory.getLogger(getClass())
+          .trace("Removing article on Instapaper: {}", title);
       connect(deleteUrl).method(Connection.Method.POST).execute();
     }
 
@@ -118,20 +119,20 @@ public class Instapaper
       Element text = _text;
       if ( text == null )
       {
-        LoggerFactory.getLogger(getClass()).trace(
-          "Retrieving article from Instapaper: {}", title);
+        LoggerFactory.getLogger(getClass())
+            .trace("Retrieving article from Instapaper: {}", title);
         final Document doc = connect(textUrl).get();
         final Element story = doc.getElementById("story");
         if ( story == null )
           throw new HasInstapaperLayoutChangedException(
-            "Could not find div#story for article: " + title);
+              "Could not find div#story for article: " + title);
 
         final List<Node> contents = story.childNodes();
         switch ( contents.size() )
         {
           case 0:
             throw new HasInstapaperLayoutChangedException(
-              "Empty div#story for article: " + title);
+                "Empty div#story for article: " + title);
           case 1:
           {
             Node node = contents.get(0);
@@ -164,10 +165,10 @@ public class Instapaper
       final StringBuilder buff = new StringBuilder(title);
 
       buff.append("\n  ").append(originalUrl) //
-      .append("\n  Text: ").append(textUrl) //
-      .append("\n  Archive: ").append(archiveUrl) //
-      .append("\n  Move: ").append(moveUrl) //
-      .append("\n  Delete: ").append(deleteUrl) //
+          .append("\n  Text: ").append(textUrl) //
+          .append("\n  Archive: ").append(archiveUrl) //
+          .append("\n  Move: ").append(moveUrl) //
+          .append("\n  Delete: ").append(deleteUrl) //
       ;
 
       if ( Str.isNotEmpty(summary) )
@@ -261,8 +262,8 @@ public class Instapaper
         final String delete_url;
         final String move_url;
         {
-          final Element container = article.getElementsByClass(
-            "article_actions").first();
+          final Element container = article
+              .getElementsByClass("article_actions").first();
           if ( container == null )
             throw new HasInstapaperLayoutChangedException(
                 "Cannot find div.article_actions for article: " + title);
@@ -330,7 +331,7 @@ public class Instapaper
    * @throws IOException
    */
   public static Session login( final String email, final String pass )
-      throws IOException
+    throws IOException
   {
     final Connection conn = Conn.connect(BASE_URL + "/user/login");
     conn.data("username", email, "password", pass);
@@ -363,8 +364,8 @@ public class Instapaper
           "Invalid session object for Instapaper.");
 
     this.session = (InstapaperSession) session;
-    this.titleMunger = (title_munger != null) ? title_munger : TitleMunger
-        .empty();
+    this.titleMunger = (title_munger != null) ? title_munger
+        : TitleMunger.empty();
   }
 
   /**
@@ -414,18 +415,15 @@ public class Instapaper
       final TreeMapIgnoreCase<Folder> map = Colls.newTreeMapIgnoreCase();
       {
         final Folder folder = new Folder(DEFAULT_FOLDER, DEFAULT_URL,
-          DEFAULT_ID);
+            DEFAULT_ID);
         folder._saveArticles(doc);
         log.trace("Folder: {} => {}", DEFAULT_FOLDER, DEFAULT_URL);
         map.put(folder.getName(), folder);
       }
 
       final Elements folder_columns = doc.getElementsByClass("folder_link");
-      if ( (folder_columns == null) || folder_columns.isEmpty() )
-        throw new HasInstapaperLayoutChangedException(
-            "Could not find folder column.");
-
-      _getFolders(folder_columns, map);
+      if ( (folder_columns != null) && (!folder_columns.isEmpty()) )
+        _getFolders(folder_columns, map);
 
       _folders = folders = ImmutableSortedMap.copyOfSorted(map);
     }
